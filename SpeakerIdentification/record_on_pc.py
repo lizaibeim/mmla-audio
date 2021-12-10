@@ -27,12 +27,9 @@ duration = 2.56  # recording voice for each 2.56 seconds
 vad = webrtcvad.Vad(3)
 aio = Client('nsqpdn', 'aio_XBKn16yifFajH3JTamhIzWKoSXhU')
 speakerID_feed = aio.feeds('audio-identification.speakerid-realtime')
-url = 'https://io.adafruit.com/api/v2/nsqpdn/feeds/audio-identification.speakerid-post/data'
-io_key = 'aio_XBKn16yifFajH3JTamhIzWKoSXhU'
+url = ''
+io_key = ''
 
-
-# url = 'https://io.adafruit.com/api/v2/lizaibeim/feeds/speaker-id-feed/data' # mine
-# io_key = 'aio_MZdm86JOoSqXlXSGZdexwnEzcnJ9' # mi
 
 class Frame(object):
     def __init__(self, bytes, timestamp, duration):
