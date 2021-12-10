@@ -28,8 +28,8 @@ sampwidth = 2  # sample width 2bytes
 dur = 2.56  # duration of one segment
 vad = webrtcvad.Vad(3)
 overlap_degree_dict = {'0': 'non-overlapped', '1': 'overlapped'}
-url = 'https://io.adafruit.com/api/v2/nsqpdn/feeds/audio-identification.overlap-realtime/data'
-io_key = 'aio_XBKn16yifFajH3JTamhIzWKoSXhU'
+url = ''
+io_key = ''
 
 
 class Frame(object):
