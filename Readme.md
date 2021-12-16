@@ -35,7 +35,7 @@ cd ..
 python setup.py
 
 ```
-The *setup.py* will automatically install the required libraries. Howeve, it may fail if you are using the macos when installing the PyAudio. Currenly, we install the PyAudio directly from *PyAudio-0.2.11-cp39-cp39-win_amd64.whl* file and you should find the correct PyAudio wheel which matches with your operating system. 
+The *setup.py* will automatically install the required libraries. However, it may fail if you are using the macos when installing the PyAudio. Currenly, we install the PyAudio directly from *PyAudio-0.2.11-cp39-cp39-win_amd64.whl* file and you should find the correct PyAudio wheel which matches with your operating system. 
 
 ### 4. After successfully installing the rquired libraries, you need to add a new python intepreter if you are using pycharm by using the existing virtual environment. 
 ---
