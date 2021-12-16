@@ -1,6 +1,6 @@
 import os
 
-libs = ["keyboard", "librosa", "noisereduce", "numpy", "requests", "soundfile", "tensorflow", "webrtcvad-wheels",
+libs = ["pandas", "keyboard", "librosa", "noisereduce", "numpy", "requests", "soundfile", "tensorflow", "webrtcvad-wheels",
         "python_speech_features", "Adafruit_IO", "PyAudio-0.2.11-cp39-cp39-win_amd64.whl", "scipy", "sklearn",
         "pyecharts", "numba==0.53", "opencv-python", "scikit-image"]
 

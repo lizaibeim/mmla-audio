@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-# from tensorflow.keras import backend as K
-from keras import backend as K
+from tensorflow.keras import backend as K
+# from keras import backend as K
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 from tensorflow.keras import regularizers

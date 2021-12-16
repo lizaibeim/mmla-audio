@@ -11,8 +11,8 @@ from tensorflow.keras.optimizers import Adadelta
 from tensorflow.keras.layers import Bidirectional, add, Input, LSTM, Dense, Activation, Conv2D, MaxPool2D, Flatten, \
     Dropout, BatchNormalization, Lambda, LeakyReLU
 from tensorflow.keras import regularizers
-# from tensorflow.keras import backend as K
-from keras import backend as K
+from tensorflow.keras import backend as K
+# from keras import backend as K
 from sklearn.preprocessing import OneHotEncoder
 
 seed = 0
