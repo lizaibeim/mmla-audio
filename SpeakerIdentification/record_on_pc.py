@@ -25,12 +25,21 @@ channels = 1  # channels
 sampwidth = 2  # sample width 2bytes
 duration = 2.56  # recording voice for each 2.56 seconds
 vad = webrtcvad.Vad(3)
+<<<<<<< HEAD
 
 
 # url = ''
 # io_key = ''
 
 
+=======
+aio = Client('nsqpdn', 'aio_XBKn16yifFajH3JTamhIzWKoSXhU')
+speakerID_feed = aio.feeds('audio-identification.speakerid-realtime')
+url = ''
+io_key = ''
+
+
+>>>>>>> 69b10b49136ecc9e8d031c9e37f77f0cbaed2428
 class Frame(object):
     def __init__(self, bytes, timestamp, duration):
         self.bytes = bytes
