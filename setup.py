@@ -7,9 +7,6 @@ libs = ["pandas", "keyboard", "librosa", "noisereduce", "numpy", "requests", "so
 print("Install Virtual Environment")
 
 try:
-    os.system("pip install virtualenv")
-    os.system("py -m virtualenv env")
-    os.system("source env/Scripts/activate")
     for lib in libs:
         os.system("pip install " + lib)
 
