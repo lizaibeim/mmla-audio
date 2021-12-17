@@ -16,6 +16,8 @@ This will create a virtual environment directory *.\venv\\*
 ----
 
 ### 2. Activate the virutal environment by typing in
+
+#### For windows user
 ```
 cd .\venv\Scripts\
 ```
@@ -23,7 +25,20 @@ This will re-direct the current working directory to the Scripts folder. Then, a
 ```
 .\activate
 ```
+
+#### For linux/macosx user
+```
+cd ./venv/bin/
+```
+
+```
+source activate
+```
+
 ---
+
+
+
 ### 3. Run the *setup.py* by typing the following commands
 ```
 cd ..
@@ -35,7 +50,16 @@ cd ..
 python setup.py
 
 ```
-The *setup.py* will automatically install the required libraries. However, it may fail if you are using the macos when installing the PyAudio. Currenly, we install the PyAudio directly from *PyAudio-0.2.11-cp39-cp39-win_amd64.whl* file and you should find the correct PyAudio wheel which matches with your operating system. 
+
+The *setup.py* will automatically install the required libraries. For macosx user, after running the setup script, you need to install the pyAudio library manually by typing the following commands:
+
+```
+brew install portaudio
+```
+
+```
+pip install pyAudio
+```
 
 ### 4. After successfully installing the rquired libraries, you need to add a new python intepreter if you are using pycharm by using the existing virtual environment. 
 ---
