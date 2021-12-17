@@ -57,7 +57,7 @@ def recording(filename, duration, noise_reduced=False):
         # loop of read，read 2000 frames each iteration (0.175s)
         string_audio_data = stream.read(num_samples)
         my_buf.append(string_audio_data)
-    print('[INFO] Recroding Done.')
+    print('[INFO] Recording Done.')
 
     if not noise_reduced:
         save_wave_file(NOISE_PATH, my_buf, noise_reduce=False)
@@ -86,6 +86,11 @@ def run_overlap_detection(silence_removed=False):
     # with open('overlap_degree_dict.json') as f:
     #     overlap_degree_dict = json.load(f)
     # print(overlap_degree_dict)
+
+    if not os.path.exists('./experiment/logs/'):
+        os.mkdir('./experiment/logs/')
+    if not os.path.exists('./experiment/recordings/'):
+        os.mkdir('./experiment/recordings/')
 
     print('[INFO] Model loaded: start predicting...')
     pa = PyAudio()

@@ -297,11 +297,11 @@ def make_feature_experiment(wav_files):
                 percent, strprogress, i, len(train_y), gaptime, eta_time))
             sys.stdout.write('\r' + str_log)
 
-        # for windows
-        label = onewav.split('\\')[1][:-4]
-
-        # for raspberry pi
-        # label = onewav.split('/')[3][:-4]
+        # for raspberry pi and macosx
+        if os.name == 'nt' or os.name == 'posix':
+            label = onewav.split('/')[3][:-4]
+        else: # for windows
+            label = onewav.split('\\')[1][:-4]
 
         (rate, sig) = wav.read(onewav)
         mfcc_feat = mfcc(sig, rate, winlen=0.025, winstep=0.01, nfft=512)

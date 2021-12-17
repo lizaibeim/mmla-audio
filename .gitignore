@@ -1,2 +1,10 @@
+/SpeakerIdentification/experiment/logs/
+/SpeakerIdentification/experiment/recordings/
+/SpeakerIdentification/experiment/data/
+/SpeakerIdentification/experiment/Ambient_Noise.wav
+/SpeakerIdentification/experiment/experiment_feature.npz
+/SpeakerIdentification/experiment/speaker_id_dict.json
+/OverlapDetection/experiment/logs/
+/OverlapDetection/experiment/recordings/
 /venv/
 /.idea/

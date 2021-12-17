@@ -13,7 +13,6 @@ import requests
 import soundfile as sf
 import tensorflow as tf
 import webrtcvad
-from Adafruit_IO import Client
 from pyaudio import PyAudio, paInt16
 
 import speaker_identification as vi
@@ -25,21 +24,11 @@ channels = 1  # channels
 sampwidth = 2  # sample width 2bytes
 duration = 2.56  # recording voice for each 2.56 seconds
 vad = webrtcvad.Vad(3)
-<<<<<<< HEAD
 
-
-# url = ''
-# io_key = ''
-
-
-=======
-aio = Client('nsqpdn', 'aio_XBKn16yifFajH3JTamhIzWKoSXhU')
-speakerID_feed = aio.feeds('audio-identification.speakerid-realtime')
 url = ''
 io_key = ''
 
 
->>>>>>> 69b10b49136ecc9e8d031c9e37f77f0cbaed2428
 class Frame(object):
     def __init__(self, bytes, timestamp, duration):
         self.bytes = bytes
@@ -48,6 +37,8 @@ class Frame(object):
 
 
 def recording(filename, duration, noise_reduced=False, silence_removed=False):
+    if not os.path.exists('./experiment/data/'):
+        os.mkdir('./experiment/data/')
     filepath = './experiment/data/' + str(filename) + '.wav'
 
     pa = PyAudio()
@@ -64,7 +55,7 @@ def recording(filename, duration, noise_reduced=False, silence_removed=False):
         # loop of read，read 2000 frames each iteration (0.175s)
         string_audio_data = stream.read(num_samples)
         my_buf.append(string_audio_data)
-    print('[INFO] Recroding Done.')
+    print('[INFO] Recording Done.')
 
     if not noise_reduced:
         save_wave_file(NOISE_PATH, my_buf, noise_reduced=False, silence_removed=silence_removed)
@@ -84,6 +75,12 @@ def run_speaker_identification(noise_reduced=False, silence_removed=False):
     print(speaker_id_dict)
 
     print('[INFO] Model loaded: start predicting...')
+
+    if not os.path.exists('./experiment/logs/'):
+        os.mkdir('./experiment/logs/')
+    if not os.path.exists('./experiment/recordings/'):
+        os.mkdir('./experiment/recordings/')
+
     pa = PyAudio()
 
     count = 0
@@ -92,6 +89,7 @@ def run_speaker_identification(noise_reduced=False, silence_removed=False):
     os.mkdir(run_dir)
 
     while not quit_flag:
+
         stream = pa.open(format=paInt16, channels=channels,
                          rate=framerate, input=True, frames_per_buffer=num_samples)
         print('[INFO] One iteration...')
@@ -129,7 +127,8 @@ def run_speaker_identification(noise_reduced=False, silence_removed=False):
 
         prob = model.predict(x)
         key = str(np.argmax(model.predict(x), axis=1)[0])
-        print('[RESULT] Predcition for the last 2 seconds: ', 'probability: ', prob, 'speaker: ', speaker_id_dict[key])
+        print('[RESULT] Predcition for the last 2 seconds: ', 'probability: ', prob, 'speaker: ',
+              speaker_id_dict[key])
 
         with open(log_path, 'a') as f:
             if count == 1:
@@ -285,7 +284,8 @@ def main():
                 count + 1) + ' th speaker, please enter the speaker name or [N] to exit.')
             while val3 == '' or val3 in speakers:
                 print(
-                    '[WARNING] Invalid input, maybe you enter an empty speaker name or duplicate speaker name who is already registered.')
+                    '[WARNING] Invalid input, maybe you enter an empty speaker name or duplicate speaker name who is '
+                    'already registered.')
                 val3 = input(
                     '[INFO] Register for the ' + str(count + 1) + ' th speaker, please enter the speaker name.')
 
