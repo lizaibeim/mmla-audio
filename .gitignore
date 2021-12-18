@@ -9,3 +9,4 @@
 /OverlapDetection/experiment/Ambient_Noise.wav
 /venv/
 /.idea/
+__pycache__/
