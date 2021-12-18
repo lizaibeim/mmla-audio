@@ -53,7 +53,9 @@ brew install portaudio
 pip3 install pyAudio
 ```
 
-### 4. After successfully installing the rquired libraries, you need to add a new python intepreter if you are using pycharm by using the existing virtual environment. You can run it on terminal without setting the python intepreter. 
+### 4. After successfully installing the rquired libraries, you need to add a new python intepreter if you are using pycharm by using the existing virtual environment. You can run it on terminal without setting the python intepreter.
+
+Make sure you are in the virtual environment. The (venv) should at the start of the line.
 
 #### Run the *run_on_pc.py* script under the *./OverlapDection* and *./SpeakerIdentification* folder for running the overlap detector and speaker identification model and follow the prompts on console.
 
