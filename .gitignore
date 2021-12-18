@@ -6,5 +6,6 @@
 /SpeakerIdentification/experiment/speaker_id_dict.json
 /OverlapDetection/experiment/logs/
 /OverlapDetection/experiment/recordings/
+/OverlapDetection/experiment/Ambient_Noise.wav
 /venv/
 /.idea/
