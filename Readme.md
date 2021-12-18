@@ -1,10 +1,9 @@
 # User Manual
 
-## Create the virtual environment and pre-install the  third-party libraries
+## Create the virtual environment and install the required third-party libraries
 
-### 1. In terminal and under the current project directory, type the command
+### 1. In terminal and under the current project directory, type the following commands:
 
-#### For Windows
 ```
 pip3 install virtualenv
 ```
@@ -16,7 +15,7 @@ This will create a virtual environment directory *.\venv\\*
 
 ----
 
-### 2. Activate the virutal environment by typing in
+### 2. Activate the virutal environment by commands:
 
 #### For Windows
 ```
