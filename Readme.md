@@ -4,11 +4,12 @@
 
 ### 1. In terminal and under the current project directory, type the command
 
+#### For Windows
 ```
-pip install virtualenv
+pip3 install virtualenv
 ```
 ```
-py -m virtualenv venv
+python3 -m virtualenv venv
 ```
 
 This will create a virtual environment directory *.\venv\\*
@@ -17,16 +18,16 @@ This will create a virtual environment directory *.\venv\\*
 
 ### 2. Activate the virutal environment by typing in
 
-#### For windows user
+#### For Windows
 ```
-cd .\venv\Scripts\
+cd ./venv/Scripts/
 ```
 This will re-direct the current working directory to the Scripts folder. Then, activate the bash *activate.bat* bash file by typing in
 ```
-.\activate
+./activate
 ```
 
-#### For linux/macosx user
+#### For Mac/Linux
 ```
 cd ./venv/bin/
 ```
@@ -38,17 +39,9 @@ source activate
 ---
 
 
-
 ### 3. Run the *setup.py* by typing the following commands
 ```
-cd ..
-```
-```
-cd ..
-```
-```
-python setup.py
-
+python3 ./../../setup.py
 ```
 
 The *setup.py* will automatically install the required libraries. For macosx user, after running the setup script, you need to install the pyAudio library manually by typing the following commands:
@@ -58,7 +51,7 @@ brew install portaudio
 ```
 
 ```
-pip install pyAudio
+pip3 install pyAudio
 ```
 
 ### 4. After successfully installing the rquired libraries, you need to add a new python intepreter if you are using pycharm by using the existing virtual environment. 
