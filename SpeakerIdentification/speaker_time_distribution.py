@@ -65,6 +65,9 @@ def draw_pie_chart():
         )
         # pie.set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
 
+        if not os.path.exists("./experiment/pie_charts/"):
+	        os.mkdir("./experiment/pie_charts/")
+
         pie.render('./experiment/pie_charts/' + str(log_file) + '.html')
 
 
