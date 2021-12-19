@@ -74,7 +74,7 @@ It will consecutively detect the overlaps for each 2.5 seconds.
 You need to keep quiet for 10 seconds in order to record the ambient noise for calibrating the background noise.
 ### 2. Register the speakers you want to identify during the conversation
 The speaker need to read a 1 minute paragraph for registering your voice in the database. 
-### 3. Wait for traning
+### 3. Wait for training
 The model will do training based on the registered speakers' corpus.
 ### 4. Start to identify the speaker
 It will consecutively identify the speaker for each 1.5 seconds.
