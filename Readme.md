@@ -13,7 +13,6 @@ python3 -m virtualenv venv
 
 This will create a virtual environment directory *.\venv\\*
 
-----
 
 ### 2. Activate the virutal environment by typing the following commands:
 
@@ -35,7 +34,6 @@ cd ./venv/bin/
 source activate
 ```
 
----
 
 
 ### 3. Run the *setup.py* by typing the following commands
@@ -57,18 +55,20 @@ pip3 install pyAudio
 
 Make sure you have entered the virtual environment so that the *(venv)* will show at the very begining of the prompt in terminal.
 
-#### Go to *./OverlapDection* or *./SpeakerIdentification* folder and then type the following command to start the overlap detector or speaker identification model.
+### 5. Go to *./OverlapDection* or *./SpeakerIdentification* folder and then type the following command to start the overlap detector or speaker identification model.
 
 ```
 python3 ./record_on_pc.py
 ```
 
+---
 ## Guidelines for running overlap detector
 ### 1. Record ambient noise
 You need to keep quiet for 10 seconds in order to record the ambient noise for calibrating the background noise.
 ### 2. Start to detect overlap
 It will consecutively detect the overlaps for each 2.5 seconds.
 
+---
 ## Guidelines for running speaker identification
 ### 1. Record ambient noise
 You need to keep quiet for 10 seconds in order to record the ambient noise for calibrating the background noise.
@@ -79,6 +79,7 @@ The model will do training based on the registered speakers' corpus.
 ### 4. Start to identify the speaker
 It will consecutively identify the speaker for each 1.5 seconds.
 
+---
 ## Analysing
 ### 1.Data
 For all data, it would be stored under the ./experiment folder.
