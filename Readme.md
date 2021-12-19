@@ -1,6 +1,6 @@
 # User Manual
 
-## Create the virtual environment and install the required third-party libraries
+## I. Create the virtual environment and install the required third-party libraries
 
 ### 1. In terminal and under the current project directory, type the following commands:
 
@@ -62,14 +62,14 @@ python3 ./record_on_pc.py
 ```
 
 ---
-## Guidelines for running overlap detector
+## II. Guidelines for running overlap detector
 ### 1. Record ambient noise
 You need to keep quiet for 10 seconds in order to record the ambient noise for calibrating the background noise.
 ### 2. Start to detect overlap
 It will consecutively detect the overlaps for each 2.5 seconds.
 
 ---
-## Guidelines for running speaker identification
+## III. Guidelines for running speaker identification
 ### 1. Record ambient noise
 You need to keep quiet for 10 seconds in order to record the ambient noise for calibrating the background noise.
 ### 2. Register the speakers you want to identify during the conversation
@@ -80,10 +80,10 @@ The model will do training based on the registered speakers' corpus.
 It will consecutively identify the speaker for each 1.5 seconds.
 
 ---
-## Analysing
-### 1.Data
+## IV. Analysing
+### 1. Data
 For all data, it would be stored under the ./experiment folder.
-### 2.Diagram
+### 2. Diagram
 You can draw the speaker time distribution digram for visualizing the conversation by typing the following command:
 ```
 python3 ./speaker_time_distribution.py
