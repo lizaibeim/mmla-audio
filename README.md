@@ -57,12 +57,15 @@ Make sure you have entered the virtual environment so that the *(venv)* will sho
 
 ### 5. Go to *./OverlapDection* or *./SpeakerIdentification* folder and then type the following command to start the overlap detector or speaker identification model.
 
+
 ```
-python3 ./../../OverlapDetection/record_on_pc.py
+cd ../../OverlapDetection
+python3 record_on_pc.py
 ```
 or
 ```
-python3 ./../../SpeakerIdentification/record_on_pc.py
+cd ../../SpeakerIdentification
+python3 record_on_pc.py
 ```
 
 
