@@ -1,12 +1,15 @@
-/venv/
-/.idea/
+# ignore everything
+*
 
-Ambient_Noise.wav
-experiment_feature.npz
-speaker_id_dict.json
-.DS_Store
+!/OverlapDetection/experiment/model/
+!/OverlapDetection/timit/
+!/OverlapDetection/scripts/
 
-logs/
-recordings/
-data/
-__pycache__/
+!/SpeakerIdentification/experiment/model/
+!/SpeakerIdentification/scripts/
+!/SpeakerIdentification/timit/
+
+!/.gitignore
+!/PyAudio-0.2.11-cp39-cp39-win_amd64.whl
+!/README.md
+!/setup.py
