@@ -93,7 +93,7 @@ or
 python3 OverlapDetection/scripts/overlap_degree_distribution.py
 ```
 
-The corresponding pie charts is stored under the ./experiment/pie_charts/ directory.
+The corresponding pie charts is stored under the /experiment/pie_charts/ directory.
 
 
 
