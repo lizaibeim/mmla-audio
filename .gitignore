@@ -1,15 +1,9 @@
-# ignore everything
-*
+/OverlapDetection/experiment/*
+!/OverlapDetection/experiment/model
 
-!./OverlapDetection/experiment/model/
-!./OverlapDetection/timit/
-!./OverlapDetection/scripts/
+/SpeakerIdentification/experiment/*
+!/SpeakerIdentification/experiment/model
 
-!./SpeakerIdentification/experiment/model/
-!./SpeakerIdentification/scripts/
-!./SpeakerIdentification/timit/
+/venv/
 
-!/.gitignore
-!/PyAudio-0.2.11-cp39-cp39-win_amd64.whl
-!/README.md
-!/setup.py
+
