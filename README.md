@@ -86,14 +86,14 @@ For all data, it would be stored under the ./experiment folder.
 ### 2. Diagram
 You can draw the overlap degree and speaker time distribution digrams for visualizing the conversation by typing the following command:
 ```
-python3 OverlapDetection/scripts/speaker_time_distribution.py
+python3 SpeakerIdentification/scripts/speaker_time_distribution.py
 ```
 or
 ```
-python3 SpeakerIdentification/scripts/overlap_degree_distribution.py
+python3 OverlapDetection/scripts/overlap_degree_distribution.py
 ```
 
-The corresponding pie charts is stored under the ./experiment/pie_charts/ directory.
+The corresponding pie charts is stored under the /experiment/pie_charts/ directory.
 
 
 
