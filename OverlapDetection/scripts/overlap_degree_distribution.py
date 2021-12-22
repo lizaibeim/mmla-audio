@@ -6,9 +6,10 @@ from datetime import datetime
 from pyecharts import options as opts
 from pyecharts.charts import Pie
 
+Root_Dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 
 def draw_pie_chart():
-    log_dir = './experiment/logs/'
+    log_dir = Root_Dir + '/experiment/logs/'
     log_files = os.listdir(log_dir)
 
     for log_file in log_files:
@@ -65,10 +66,10 @@ def draw_pie_chart():
         )
         # pie.set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
 
-        if not os.path.exists("./experiment/pie_charts/"):
-            os.mkdir("./experiment/pie_charts/")
+        if not os.path.exists(Root_Dir + "/experiment/pie_charts/"):
+            os.mkdir(Root_Dir + "/experiment/pie_charts/")
 
-        pie.render('./experiment/pie_charts/' + str(log_file) + '.html')
+        pie.render(Root_Dir + '/experiment/pie_charts/' + str(log_file) + '.html')
 
 
 if __name__ == '__main__':
