@@ -2,7 +2,7 @@
 
 ## I. Create the virtual environment and install the required third-party libraries
 
-### 1. In terminal and under the current project directory, type the following commands:
+### 1. In terminal and under the current project directory */MMLA_Audio/*, type the following commands:
 
 ```
 pip3 install virtualenv
@@ -18,30 +18,20 @@ This will create a virtual environment directory *.\venv\\*
 
 #### For Windows
 ```
-cd ./venv/Scripts/
-```
-This will re-direct the current working directory to the Scripts folder. Then, activate the bash *activate.bat* bash file by typing in
-```
-./activate
+./venv/Scripts/activate.bat
 ```
 
 #### For Mac/Linux
 ```
-cd ./venv/bin/
+source ./venv/bin/activate
 ```
-
-```
-source activate
-```
-
-
 
 ### 3. Run the *setup.py* by typing the following commands
 ```
-python3 ./../../setup.py
+python3 setup.py
 ```
 
-The *setup.py* will automatically install the required libraries. For macosx user, after running the setup script, you need to install the pyAudio library manually by typing the following commands:
+The *setup.py* will automatically install the required libraries. For ***Mac/Linux*** user, after running the setup script, you need to install the pyAudio library manually by typing the following commands:
 
 ```
 brew install portaudio
@@ -53,19 +43,18 @@ pip3 install pyAudio
 
 ### 4. After successfully installing the rquired libraries, you need to add a new python intepreter if you are using pycharm by using the existing virtual environment. You can run it on terminal without setting the python intepreter.
 
-Make sure you have entered the virtual environment so that the *(venv)* will show at the very begining of the prompt in terminal.
+Make sure you have entered the virtual environment so that the ***(venv)*** will show at the very begining of the prompt in terminal.
 
 ### 5. Go to *./OverlapDection* or *./SpeakerIdentification* folder and then type the following command to start the overlap detector or speaker identification model.
 
 
 ```
-python3 ./../../OverlapDetection/scripts/record_on_pc.py
+python3 OverlapDetection/scripts/record_on_pc.py
 ```
 or
 ```
-python3 ./../../SpeakerIdentification/scripts/record_on_pc.py
+python3 SpeakerIdentification/scripts/record_on_pc.py
 ```
-
 
 ---
 ## II. Guidelines for running overlap detector
@@ -97,8 +86,13 @@ For all data, it would be stored under the ./experiment folder.
 ### 2. Diagram
 You can draw the overlap degree and speaker time distribution digrams for visualizing the conversation by typing the following command:
 ```
-python3 ./speaker_time_distribution.py
+python3 OverlapDetection/scripts/speaker_time_distribution.py
 ```
+or
+```
+python3 SpeakerIdentification/scripts/overlap_degree_distribution.py
+```
+
 The corresponding pie charts is stored under the ./experiment/pie_charts/ directory.
 
 
