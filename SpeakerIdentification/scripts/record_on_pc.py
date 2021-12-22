@@ -1,6 +1,7 @@
 import collections
 import json
 import os
+import sys
 import time
 import wave
 from datetime import datetime
@@ -14,10 +15,13 @@ import soundfile as sf
 import tensorflow as tf
 import webrtcvad
 from pyaudio import PyAudio, paInt16
+from tensorflow.keras import backend as K
 
 import speaker_identification as vi
 
-NOISE_PATH = './experiment/Ambient_Noise.wav'
+Root_Dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+NOISE_PATH = os.path.join(Root_Dir, 'experiment/Ambient_Noise.wav')
+
 framerate = 16000  # sampling rate
 num_samples = 2000  # sampling points for each chunk
 channels = 1  # channels
@@ -37,9 +41,9 @@ class Frame(object):
 
 
 def recording(filename, duration, noise_reduced=False, silence_removed=False):
-    if not os.path.exists('./experiment/data/'):
-        os.mkdir('./experiment/data/')
-    filepath = './experiment/data/' + str(filename) + '.wav'
+    if not os.path.exists(Root_Dir + '/experiment/data/'):
+        os.mkdir(Root_Dir + '/experiment/data/')
+    filepath = Root_Dir + '/experiment/data/' + str(filename) + '.wav'
 
     pa = PyAudio()
     stream = pa.open(format=paInt16, channels=channels,
@@ -68,78 +72,83 @@ def recording(filename, duration, noise_reduced=False, silence_removed=False):
 
 def run_speaker_identification(noise_reduced=False, silence_removed=False):
     quit_flag = False
-    model_path = './experiment/model'
+    model_path = Root_Dir + '/experiment/model'
     model = tf.keras.models.load_model(model_path)
-    with open('./experiment/speaker_id_dict.json') as f:
+    with open(Root_Dir + '/experiment/speaker_id_dict.json') as f:
         speaker_id_dict = json.load(f)
     print(speaker_id_dict)
 
     print('[INFO] Model loaded: start predicting...')
 
-    if not os.path.exists('./experiment/logs/'):
-        os.mkdir('./experiment/logs/')
-    if not os.path.exists('./experiment/recordings/'):
-        os.mkdir('./experiment/recordings/')
+    if not os.path.exists(Root_Dir + '/experiment/logs/'):
+        os.mkdir(Root_Dir + '/experiment/logs/')
+    if not os.path.exists(Root_Dir + '/experiment/recordings/'):
+        os.mkdir(Root_Dir + '/experiment/recordings/')
 
     pa = PyAudio()
 
     count = 0
-    log_path = './experiment/logs/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[:-7] + '.txt'
-    run_dir = './experiment/recordings/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[:-7]
+    log_path = Root_Dir + '/experiment/logs/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[:-7] + '.txt'
+    run_dir = Root_Dir + '/experiment/recordings/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[:-7]
     os.mkdir(run_dir)
 
-    while not quit_flag:
+    try:
+        while not quit_flag:
 
-        stream = pa.open(format=paInt16, channels=channels,
-                         rate=framerate, input=True, frames_per_buffer=num_samples)
-        print('[INFO] One iteration...')
-        frames = []
-        t = time.time()
-        while time.time() < t + duration:  # set the predicting duration
-            if keyboard.is_pressed('q'):
-                quit_flag = True
-                print("Quit now...")
-                # break
+            stream = pa.open(format=paInt16, channels=channels,
+                             rate=framerate, input=True, frames_per_buffer=num_samples)
+            print('[INFO] One iteration...')
+            frames = []
+            t = time.time()
+            while time.time() < t + duration:  # set the predicting duration
+                # if keyboard.is_pressed('q'):
+                #     quit_flag = True
+                #     print("Quit now...")
+                #     # break
 
-            # loop of read，read 2000 frames each iteration (0.175s)
-            string_audio_data = stream.read(num_samples)
-            frames.append(string_audio_data)
+                # loop of read，read 2000 frames each iteration (0.175s)
+                string_audio_data = stream.read(num_samples)
+                frames.append(string_audio_data)
 
-        count += 1
-        filepath = run_dir + '/' + str(count) + '.wav'
+            count += 1
+            filepath = run_dir + '/' + str(count) + '.wav'
 
-        save_wave_file(filepath, frames, noise_reduced=noise_reduced, silence_removed=silence_removed)
-        x = vi.input_feature_gen(filepath)
-        if x == 'silent':
-            print('Predcition for the last 2 seconds: silent')
+            save_wave_file(filepath, frames, noise_reduced=noise_reduced, silence_removed=silence_removed)
+            x = vi.input_feature_gen(filepath)
+            if x == 'silent':
+                print('Predcition for the last 2 seconds: silent')
+
+                with open(log_path, 'a') as f:
+                    if count == 1:
+                        f.write('segment' + '\t' + 'speaker' + '\t' + 'timestamp')
+                        f.write('\n')
+
+                    # send_fruit_io('silent', str(datetime.utcnow().isoformat()))
+                    f.write(str(count) + '\t' + 'silent' + '\t' + str(datetime.today()))
+                    f.write('\n')
+
+                stream.close()
+                continue
+
+            prob = model.predict(x)
+            key = str(np.argmax(model.predict(x), axis=1)[0])
+            print('[RESULT] Predcition for the last 2 seconds: ', 'probability: ', prob, 'speaker: ',
+                  speaker_id_dict[key])
 
             with open(log_path, 'a') as f:
                 if count == 1:
                     f.write('segment' + '\t' + 'speaker' + '\t' + 'timestamp')
                     f.write('\n')
 
-                # send_fruit_io('silent', str(datetime.utcnow().isoformat()))
-                f.write(str(count) + '\t' + 'silent' + '\t' + str(datetime.today()))
+                # send_fruit_io(str(speaker_id_dict[key]), str(datetime.utcnow().isoformat()))
+                f.write(str(count) + '\t' + str(speaker_id_dict[key]) + '\t' + str(datetime.today()))
                 f.write('\n')
 
             stream.close()
-            continue
 
-        prob = model.predict(x)
-        key = str(np.argmax(model.predict(x), axis=1)[0])
-        print('[RESULT] Predcition for the last 2 seconds: ', 'probability: ', prob, 'speaker: ',
-              speaker_id_dict[key])
-
-        with open(log_path, 'a') as f:
-            if count == 1:
-                f.write('segment' + '\t' + 'speaker' + '\t' + 'timestamp')
-                f.write('\n')
-
-            # send_fruit_io(str(speaker_id_dict[key]), str(datetime.utcnow().isoformat()))
-            f.write(str(count) + '\t' + str(speaker_id_dict[key]) + '\t' + str(datetime.today()))
-            f.write('\n')
-
-        stream.close()
+    except KeyboardInterrupt:
+        print("[INFO] Exit the program now...")
+        sys.exit(0)
 
 
 def send_fruit_io(value, time):

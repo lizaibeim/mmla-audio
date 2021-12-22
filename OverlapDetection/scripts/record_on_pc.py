@@ -1,12 +1,12 @@
 import collections
 import json
 import os
+import sys
 import time
 import wave
 from datetime import datetime
 
 import cv2
-import keyboard
 import librosa
 import noisereduce as nr
 import numpy as np
@@ -21,7 +21,10 @@ from skimage.metrics._structural_similarity import structural_similarity
 
 from overlap_features_generator import OverlapFeaturesGenerator
 
-NOISE_PATH = './experiment/Ambient_Noise.wav'
+# Get the root directory of Overlap detection
+Root_Dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+NOISE_PATH = os.path.join(Root_Dir, 'experiment/Ambient_Noise.wav')
+
 framerate = 16000  # sampling rate
 num_samples = 2000  # sampling points for each chunk
 channels = 1  # channels
@@ -41,7 +44,7 @@ class Frame(object):
 
 
 def recording(filename, duration, noise_reduced=False):
-    filepath = './experiment/data/' + str(filename) + '.wav'
+    filepath = os.path.join(Root_Dir, 'experiment/data/') + str(filename) + '.wav'
 
     pa = PyAudio()
     stream = pa.open(format=paInt16, channels=channels,
@@ -81,95 +84,97 @@ def compare_images(img1_path, img2_path):
 def run_overlap_detection(silence_removed=False):
     ofg = OverlapFeaturesGenerator(wl=25, hl=10)
     quit_flag = False
-    model_path = './timit/models/timit2.0'
+    model_path = os.path.join(Root_Dir, 'timit/models/timit2.0')
     model = tf.keras.models.load_model(model_path)
     # with open('overlap_degree_dict.json') as f:
     #     overlap_degree_dict = json.load(f)
     # print(overlap_degree_dict)
 
-    if not os.path.exists('./experiment/logs/'):
-        os.mkdir('./experiment/logs/')
-    if not os.path.exists('./experiment/recordings/'):
-        os.mkdir('./experiment/recordings/')
+    if not os.path.exists(os.path.join(Root_Dir, 'experiment/logs/')):
+        os.mkdir(os.path.join(Root_Dir, 'experiment/logs/'))
+    if not os.path.exists(os.path.join(Root_Dir, 'experiment/recordings/')):
+        os.mkdir(os.path.join(Root_Dir, 'experiment/recordings/'))
 
     print('[INFO] Model loaded: start predicting...')
     pa = PyAudio()
 
     count = 0
-    log_path = './experiment/logs/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[:-7] + '.txt'
-    p_dir = './experiment/recordings/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[
-                                         :-7]
-    c_png_dir = './experiment/recordings/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[
-                                             :-7] + '/png/'
-    c_wav_dir = './experiment/recordings/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[
-                                             :-7] + '/wav/'
+    log_path = Root_Dir + '/experiment/logs/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[:-7] + '.txt'
+    p_dir = Root_Dir + '/experiment/recordings/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[
+                                                   :-7]
+    c_png_dir = Root_Dir + '/experiment/recordings/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[
+                                                       :-7] + '/png/'
+    c_wav_dir = Root_Dir + '/experiment/recordings/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[
+                                                       :-7] + '/wav/'
     os.mkdir(p_dir)
     os.mkdir(c_png_dir)
     os.mkdir(c_wav_dir)
 
-    while not quit_flag:
-        stream = pa.open(format=paInt16, channels=channels, rate=framerate, input=True, frames_per_buffer=num_samples)
-        print('[INFO] One iteration...')
-        frames = []
-        t = time.time()
-        while time.time() < t + dur:  # set the predicting duration
-            if keyboard.is_pressed('q'):
-                quit_flag = True
-                print("Quit now...")
-                # break
+    try:
+        while not quit_flag:
+            stream = pa.open(format=paInt16, channels=channels, rate=framerate, input=True,
+                             frames_per_buffer=num_samples)
+            print('[INFO] One iteration...')
+            frames = []
+            t = time.time()
+            while time.time() < t + dur:  # set the predicting duration
 
-            # loop of read，read 2000 frames each iteration (0.175s)
-            string_audio_data = stream.read(num_samples)
-            frames.append(string_audio_data)
+                # loop of read，read 2000 frames each iteration (0.175s)
+                string_audio_data = stream.read(num_samples)
+                frames.append(string_audio_data)
 
-        count += 1
-        out_name_wav = str(count) + '.wav'
-        out_name_png = str(count) + '.png'
-        # filepath = c_wav_dir + out_name_wav
-        noise_reduced_filepath = c_wav_dir + out_name_wav
+            count += 1
+            out_name_wav = str(count) + '.wav'
+            out_name_png = str(count) + '.png'
+            # filepath = c_wav_dir + out_name_wav
+            noise_reduced_filepath = c_wav_dir + out_name_wav
 
-        # save_wave_file(filepath, frames, noise_reduce=False, silence_remove=silence_removed)
-        save_wave_file(noise_reduced_filepath, frames, noise_reduce=True, silence_remove=silence_removed)
+            # save_wave_file(filepath, frames, noise_reduce=False, silence_remove=silence_removed)
+            save_wave_file(noise_reduced_filepath, frames, noise_reduce=True, silence_remove=silence_removed)
 
-        # features_image_path = filepath[:-4] + '.png'
-        features_image_path2 = c_png_dir + out_name_png
+            # features_image_path = filepath[:-4] + '.png'
+            features_image_path2 = c_png_dir + out_name_png
 
-        # ofg.generate_zcr_image(filepath, c_dir, out_name_png)
-        ofg.generate_zcr_image(noise_reduced_filepath, c_png_dir, out_name_png)
+            # ofg.generate_zcr_image(filepath, c_dir, out_name_png)
+            ofg.generate_zcr_image(noise_reduced_filepath, c_png_dir, out_name_png)
 
-        (rate, sig) = wav.read(noise_reduced_filepath)
-        if len(sig) < 4000:
-            print("[INFO] Prediction result for last 1.5 second: silent. \n")
+            (rate, sig) = wav.read(noise_reduced_filepath)
+            if len(sig) < 4000:
+                print("[INFO] Prediction result for last 1.5 second: silent. \n")
+                with open(log_path, 'a') as f:
+                    if count == 1:
+                        f.write('segment' + '\t' + 'overlapped degree' + '\t' + 'timestamp')
+                        f.write('\n')
+
+                    # send_fruit_io('silent', str(datetime.utcnow().isoformat()))
+                    f.write(str(count) + '\t' + 'silent' + '\t' + str(datetime.today()))
+                    f.write('\n')
+
+                stream.close()
+                continue
+
+            image = tf.io.read_file(features_image_path2)
+            features_data = [tf.image.decode_png(image, 3)]
+            _input = tf.stack(features_data, axis=0).numpy().astype('float32')
+            prob = model.predict(_input)
+            key = str(np.argmax(prob, axis=1)[0])
+            print('[INFO] Predcition for the last 1.5 seconds: ', 'probability: ', prob, 'overlap degree: ',
+                  overlap_degree_dict[key])
+
             with open(log_path, 'a') as f:
                 if count == 1:
                     f.write('segment' + '\t' + 'overlapped degree' + '\t' + 'timestamp')
                     f.write('\n')
 
-                # send_fruit_io('silent', str(datetime.utcnow().isoformat()))
-                f.write(str(count) + '\t' + 'silent' + '\t' + str(datetime.today()))
+                # send_fruit_io(str(overlap_degree_dict[key]), str(datetime.utcnow().isoformat()))
+                f.write(str(count) + '\t' + str(overlap_degree_dict[key]) + '\t' + str(datetime.today()))
                 f.write('\n')
 
             stream.close()
-            continue
 
-        image = tf.io.read_file(features_image_path2)
-        features_data = [tf.image.decode_png(image, 3)]
-        _input = tf.stack(features_data, axis=0).numpy().astype('float32')
-        prob = model.predict(_input)
-        key = str(np.argmax(prob, axis=1)[0])
-        print('[INFO] Predcition for the last 1.5 seconds: ', 'probability: ', prob, 'overlap degree: ',
-              overlap_degree_dict[key])
-
-        with open(log_path, 'a') as f:
-            if count == 1:
-                f.write('segment' + '\t' + 'overlapped degree' + '\t' + 'timestamp')
-                f.write('\n')
-
-            # send_fruit_io(str(overlap_degree_dict[key]), str(datetime.utcnow().isoformat()))
-            f.write(str(count) + '\t' + str(overlap_degree_dict[key]) + '\t' + str(datetime.today()))
-            f.write('\n')
-
-        stream.close()
+    except KeyboardInterrupt:
+        print("[INFO] Exit the program now...")
+        sys.exit(0)
 
 
 def send_fruit_io(value, time):

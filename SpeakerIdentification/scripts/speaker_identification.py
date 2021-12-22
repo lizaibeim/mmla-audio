@@ -19,6 +19,7 @@ from tensorflow.keras.models import load_model, Model
 from tensorflow.keras.optimizers import RMSprop
 
 np.random.seed(0)
+Root_Dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 
 
 # attain the file path list of the dataset
@@ -206,7 +207,7 @@ def train(x_train, y_train, x_validate, y_validate):
     #     CosineAnnealingScheduler(T_max=100, eta_max=1e-2, eta_min=1e-4)
     # ]
     print(model.summary())
-    checkpoint = tf.keras.callbacks.ModelCheckpoint(filepath='./ckt',
+    checkpoint = tf.keras.callbacks.ModelCheckpoint(filepath=Root_Dir + '/ckt',
                                                     monitor='val_categorical_accuracy', verbose=1, save_best_only=True,
                                                     mode='max', period=10)
     model.compile(loss="categorical_crossentropy", optimizer=RMSprop(lr=0.0001), metrics=[categorical_accuracy])
@@ -230,7 +231,7 @@ def matrix_build_pca(feature_data):
 
 
 def make_feature_timit(wav_files, speaker_ids):
-    DATASET = './timit/data'
+    DATASET = Root_Dir + '/timit/data'
     train_x = []
     train_y = []
 
@@ -287,6 +288,9 @@ def make_feature_experiment(wav_files):
     train_y = []
     begin_time = time.time()
     for i, onewav in enumerate(wav_files):
+        if i == 0:
+            print(onewav)
+
 
         if i % 5 == 4:
             gaptime = time.time() - begin_time
@@ -299,9 +303,9 @@ def make_feature_experiment(wav_files):
 
         # for raspberry pi and macosx
         if os.name == 'nt' or os.name == 'posix':
-            label = onewav.split('/')[3][:-4]
+            label = onewav.split('/')[-1][:-4]
         else: # for windows
-            label = onewav.split('\\')[1][:-4]
+            label = onewav.split('\\')[-1][:-4]
 
         (rate, sig) = wav.read(onewav)
         mfcc_feat = mfcc(sig, rate, winlen=0.025, winstep=0.01, nfft=512)
@@ -438,21 +442,21 @@ def transfer_learning(_x, _y, seed, _test_split_ratio, base_model_path, final_mo
 
 
 def transfer_learning_on_experiment():
-    wav_files = get_wav_files("./experiment/data")
+    wav_files = get_wav_files(Root_Dir + "/experiment/data")
 
     x, y, speaker_id = make_feature_experiment(wav_files)
-    np.savez("./experiment/experiment_feature", x, y)
-    with open('./experiment/speaker_id_dict.json', 'w') as f:
+    np.savez(Root_Dir + "/experiment/experiment_feature", x, y)
+    with open(Root_Dir + '/experiment/speaker_id_dict.json', 'w') as f:
         json.dump(speaker_id, f)
 
-    input_feature = np.load('./experiment/experiment_feature.npz', allow_pickle=True)
+    input_feature = np.load(Root_Dir + '/experiment/experiment_feature.npz', allow_pickle=True)
     x = input_feature['arr_0']
     y = input_feature['arr_1']
 
     test_split_ratio = 0
     random_seed = 0
-    base_model_path = './timit/model'
-    final_model_path = './experiment/model'
+    base_model_path = Root_Dir + '/timit/model'
+    final_model_path = Root_Dir + '/experiment/model'
     acc = transfer_learning(x, y, random_seed, test_split_ratio, base_model_path, final_model_path)
 
     return acc
@@ -462,16 +466,16 @@ if __name__ == '__main__':
     '''
     First training on TIMIT, generating the features
     '''
-    # wav_files_path = pd.read_csv('./timit/labels.csv').loc[:, 'path_from_data_dir_windows']
-    # speaker_ids = pd.read_csv('./timit/labels.csv').loc[:, 'speaker_id']
+    # wav_files_path = pd.read_csv(Root_Dir + '/timit/labels.csv').loc[:, 'path_from_data_dir_windows']
+    # speaker_ids = pd.read_csv(Root_Dir + '/timit/labels.csv').loc[:, 'speaker_id']
     # _x, _y = make_feature_timit(wav_files_path, speaker_ids)
-    # np.savez('./timit/input_feature', _x, _y)
+    # np.savez(Root_Dir + '/timit/input_feature', _x, _y)
 
     '''
     After the first training, just load the feautre directly
     '''
     # speakers_count_dict = np.load('speakers_count_dict.npy', allow_pickle=True).item()
-    # input_feature = np.load('./timit/input_feature.npz')
+    # input_feature = np.load(Root_Dir + '/timit/input_feature.npz')
     # _x = input_feature['arr_0']
     # _y = input_feature['arr_1']
     #
@@ -481,7 +485,7 @@ if __name__ == '__main__':
     # x_train, x_validate, y_train, y_validate = train_test_split(x_train, y_train, test_size=0.25, random_state=0, stratify=y_train)
     #
     # trained_model, history = train(x_train, y_train, x_validate, y_validate)
-    # trained_model.save('./cnnlstm')
+    # trained_model.save(Root_Dir + '/cnnlstm')
     # epochs = range(len(history.history['categorical_accuracy']))
     # plt.figure()
     # plt.plot(epochs, history.history['categorical_accuracy'], 'b', label='categorical_accuracy')
@@ -504,7 +508,7 @@ if __name__ == '__main__':
     # plt.show()
 
     '''After the first general traning, just load the pre-trained general model'''
-    # trained_model = load_model('./ckt')
+    # trained_model = load_model(Root_Dir + '/ckt')
     # print(trained_model.summary())
     # loss, accuracy = trained_model.evaluate(x_test, y_test)
     # print("Loss on test set:", loss, "Accuracy: ", accuracy)
@@ -514,27 +518,27 @@ if __name__ == '__main__':
     # when we unfreeze the base model for fine-tuning, so we make sure that the
     # base_model is running in inference mode here.
 
-    # wav_files = get_wav_files("./small_dataset/data")
+    # wav_files = get_wav_files(Root_Dir + "/small_dataset/data")
     # _x, _y, paragraph_label = make_feature_thch30(wav_files)
-    # np.savez("./small_dataset/small_dataset_feature", _x, _y)
+    # np.savez(Root_Dir + "/small_dataset/small_dataset_feature", _x, _y)
 
     '''Transfer learning on experimental dataset'''
-    wav_files = get_wav_files("./experiment/data")
+    wav_files = get_wav_files(Root_Dir + "/experiment/data")
 
     x, y, speaker_id = make_feature_experiment(wav_files)
-    np.savez("./experiment/experiment_feature", x, y)
-    with open('./experiment/speaker_id_dict.json', 'w') as f:
+    np.savez(Root_Dir + "/experiment/experiment_feature", x, y)
+    with open(Root_Dir + "/experiment/speaker_id_dict.json", 'w') as f:
         json.dump(speaker_id, f)
 
-    input_feature = np.load('./experiment/experiment_feature.npz', allow_pickle=True)
+    input_feature = np.load(Root_Dir + "/experiment/experiment_feature.npz", allow_pickle=True)
     x = input_feature['arr_0']
     y = input_feature['arr_1']
 
     test_split_ratio_lst = [0]
     acc_lst_lst = []
-    base_model_path = './timit/model'
-    final_model_path = './experiment/model'
-    with open("./experiment/acc.txt", "w") as f:
+    base_model_path = Root_Dir + "/timit/model"
+    final_model_path = Root_Dir + "/experiment/model"
+    with open(Root_Dir + "/experiment/acc.txt", "w") as f:
         f.write("split\trandom_state\tacc\n")
         for test_split_ratio in test_split_ratio_lst:
             acc_lst = []
