@@ -59,13 +59,11 @@ Make sure you have entered the virtual environment so that the *(venv)* will sho
 
 
 ```
-cd ../../OverlapDetection
-python3 record_on_pc.py
+python3 ./../../OverlapDetection/scripts/record_on_pc.py
 ```
 or
 ```
-cd ../../SpeakerIdentification
-python3 record_on_pc.py
+python3 ./../../SpeakerIdentification/scripts/record_on_pc.py
 ```
 
 
@@ -75,6 +73,8 @@ python3 record_on_pc.py
 You need to keep quiet for 10 seconds in order to record the ambient noise for calibrating the background noise.
 ### 2. Start to detect overlap
 It will consecutively detect the overlaps for each 2.5 seconds.
+### 3. Stop detecting
+Press ctrl + 'c' will exit the program.
 
 ---
 ## III. Guidelines for running speaker identification
@@ -86,16 +86,20 @@ The speaker need to read a 1 minute paragraph for registering your voice in the 
 The model will do training based on the registered speakers' corpus.
 ### 4. Start to identify the speaker
 It will consecutively identify the speaker for each 1.5 seconds.
+### 5. Stop identifying
+Press ctrl + 'c' will exit the program.
+
 
 ---
 ## IV. Analysing
 ### 1. Data
 For all data, it would be stored under the ./experiment folder.
 ### 2. Diagram
-You can draw the speaker time distribution digram for visualizing the conversation by typing the following command:
+You can draw the overlap degree and speaker time distribution digrams for visualizing the conversation by typing the following command:
 ```
 python3 ./speaker_time_distribution.py
 ```
+The corresponding pie charts is stored under the ./experiment/pie_charts/ directory.
 
 
 
