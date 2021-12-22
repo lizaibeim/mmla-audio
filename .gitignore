@@ -1,13 +1,13 @@
 # ignore everything
 *
 
-!/OverlapDetection/experiment/model/
-!/OverlapDetection/timit/
-!/OverlapDetection/scripts/
+!./OverlapDetection/experiment/model/
+!./OverlapDetection/timit/
+!./OverlapDetection/scripts/
 
-!/SpeakerIdentification/experiment/model/
-!/SpeakerIdentification/scripts/
-!/SpeakerIdentification/timit/
+!./SpeakerIdentification/experiment/model/
+!./SpeakerIdentification/scripts/
+!./SpeakerIdentification/timit/
 
 !/.gitignore
 !/PyAudio-0.2.11-cp39-cp39-win_amd64.whl
