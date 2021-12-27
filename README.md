@@ -31,6 +31,8 @@ This will create a virtual environment directory *.\venv\\*
 ```
 source ./venv/bin/activate
 ```
+***(venv)*** will show at the very begining of the prompt in terminal
+
 
 ### 3. Run the *setup.py* by typing the following commands
 #### For Windows
@@ -55,7 +57,7 @@ pip3 install pyAudio
 
 ### 4. After successfully installing the rquired libraries, you need to add a new python intepreter if you are using pycharm by using the existing virtual environment. You can run it on terminal without setting the python intepreter.
 
-Make sure you have entered the virtual environment so that the ***(venv)*** will show at the very begining of the prompt in terminal.
+Make sure you are in the virtual environment so that the ***(venv)*** will show at the very begining of the prompt in terminal.
 
 ### 5. Type the following command to start the overlap detector or speaker identification model.
 
