@@ -1,11 +1,11 @@
-/OverlapDetection/experiment/*
-!/OverlapDetection/experiment/.gitkeep
-/SpeakerIdentification/experiment/*
-!/SpeakerIdentification/experiment/.gitkeep
-
-/venv/
-/.idea/
-
+# ignore the following directories
+experiment/*
+venv/
+.idea/
 __pycache__/
 
+# ignore the following files
 .DS_Store
+
+# unignore the following files
+!.gitkeep
