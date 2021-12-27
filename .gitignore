@@ -1,5 +1,7 @@
 /OverlapDetection/experiment/*
+!/OverlapDetection/experiment/.gitkeep
 /SpeakerIdentification/experiment/*
+!/SpeakerIdentification/experiment/.gitkeep
 
 /venv/
 /.idea/
