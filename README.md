@@ -24,7 +24,7 @@ This will create a virtual environment directory *.\venv\\*
 
 #### For Windows
 ```
-./venv/Scripts/activate.bat
+.\venv\Scripts\activate.bat
 ```
 
 #### For Mac/Linux
@@ -33,6 +33,12 @@ source ./venv/bin/activate
 ```
 
 ### 3. Run the *setup.py* by typing the following commands
+#### For Windows
+```
+py setup.py
+```
+
+#### For Mac/Linux
 ```
 python3 setup.py
 ```
