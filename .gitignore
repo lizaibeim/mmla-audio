@@ -1,8 +1,5 @@
 /OverlapDetection/experiment/*
-!/OverlapDetection/experiment/model
-
 /SpeakerIdentification/experiment/*
-!/SpeakerIdentification/experiment/model
 
 /venv/
 /.idea/

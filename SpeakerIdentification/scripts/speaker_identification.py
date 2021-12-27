@@ -288,10 +288,7 @@ def make_feature_experiment(wav_files):
     train_y = []
     begin_time = time.time()
     for i, onewav in enumerate(wav_files):
-        if i == 0:
-            print(onewav)
-
-
+        
         if i % 5 == 4:
             gaptime = time.time() - begin_time
             percent = float(i) * 100 / len(wav_files)
@@ -301,10 +298,12 @@ def make_feature_experiment(wav_files):
                 percent, strprogress, i, len(train_y), gaptime, eta_time))
             sys.stdout.write('\r' + str_log)
 
-        # for raspberry pi and macosx
-        if os.name == 'nt' or os.name == 'posix':
+        # for linux and macosx
+        if  os.name == 'posix':
             label = onewav.split('/')[-1][:-4]
-        else: # for windows
+
+        # for windows
+        if os.name == 'nt':
             label = onewav.split('\\')[-1][:-4]
 
         (rate, sig) = wav.read(onewav)
@@ -457,6 +456,10 @@ def transfer_learning_on_experiment():
     random_seed = 0
     base_model_path = Root_Dir + '/timit/model'
     final_model_path = Root_Dir + '/experiment/model'
+
+    if not os.path.exists(final_model_path):
+        os.mkdir(final_model_path)
+
     acc = transfer_learning(x, y, random_seed, test_split_ratio, base_model_path, final_model_path)
 
     return acc
