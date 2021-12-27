@@ -7,8 +7,14 @@
 ```
 pip3 install virtualenv
 ```
+#### For Mac/Linux
 ```
 python3 -m virtualenv venv
+```
+
+#### For Windows
+```
+virtualenv venv
 ```
 
 This will create a virtual environment directory *.\venv\\*
