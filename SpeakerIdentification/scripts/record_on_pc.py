@@ -273,24 +273,24 @@ def vad_collector(sample_rate, frame_duration_ms, padding_duration_ms, vad, fram
 def main():
     """pivot ambient noise, set it as ten seconds duration"""
 
-    val = input('[INFO] Please be quiet for 10 seconds and the ambient noise will be collected, press [Y] to start.')
+    val = input('[INFO] Please be quiet for 10 seconds and the ambient noise will be collected, press [y] to start.')
     while val != 'y':
         val = input(
-            '[INFO] Please be quiet for 10 seconds and the ambient noise will be collected, press [Y] to start.')
+            '[INFO] Please be quiet for 10 seconds and the ambient noise will be collected, press [y] to start.')
     recording('Ambient_Noise', 10, False, False)
 
     """After recording the noise, then start to register the user"""
     count = 0
     speakers = []
     while True:
-        val2 = input('[INFO] Register for speaker, press [Y] to start or [N] to finish.')
+        val2 = input('[INFO] Register for speaker, press [y] to start or [n] to finish.')
         if val2 != 'y' and val2 != 'n':
             print('[WARNING] Invalid input')
             continue
 
         if val2 == 'y':
             val3 = input('[INFO] Register for the ' + str(
-                count + 1) + ' th speaker, please enter the speaker name or [N] to exit.')
+                count + 1) + ' th speaker, please enter the speaker name or [n] to exit.')
             while val3 == '' or val3 in speakers:
                 print(
                     '[WARNING] Invalid input, maybe you enter an empty speaker name or duplicate speaker name who is '
@@ -319,9 +319,9 @@ def main():
     print('[INFO] Training done, accuary is ', acc)
 
     """Run the speaker identification module"""
-    val4 = input('[INFO] Ready for speaker identification, press [S] to start.')
+    val4 = input('[INFO] Ready for speaker identification, press [s] to start.')
     while val4 != 's':
-        val4 = input('[INFO] Ready for speaker identification, press [S] to start.')
+        val4 = input('[INFO] Ready for speaker identification, press [s] to start.')
 
     run_speaker_identification(True, True)
 
