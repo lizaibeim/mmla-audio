@@ -1,5 +1,6 @@
 # ignore the following directories
-experiment/*
+/OverlapDetection/experiment/*
+/SpeakerIdentification/experiment/*
 venv/
 .idea/
 __pycache__/
