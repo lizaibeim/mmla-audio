@@ -7,18 +7,18 @@
 ```
 pip3 install virtualenv
 ```
-#### For Mac/Linux
-```
-python3 -m virtualenv venv
-```
 
 #### For Windows
 ```
 virtualenv venv
 ```
 
-This will create a virtual environment directory *.\venv\\*
+#### For Mac/Linux
+```
+python3 -m virtualenv venv
+```
 
+This will create a virtual environment directory *.\venv\\*
 
 ### 2. Activate the virutal environment by typing the following commands:
 
@@ -57,9 +57,19 @@ pip3 install pyAudio
 
 Make sure you have entered the virtual environment so that the ***(venv)*** will show at the very begining of the prompt in terminal.
 
-### 5. Go to *./OverlapDection* or *./SpeakerIdentification* folder and then type the following command to start the overlap detector or speaker identification model.
+### 5. Type the following command to start the overlap detector or speaker identification model.
+
+#### For Windows
+```
+py OverlapDetection\scripts\record_on_pc.py
+```
+or
+```
+py SpeakerIdentification\scripts\record_on_pc.py
+```
 
 
+#### For Mac/Linux
 ```
 python3 OverlapDetection/scripts/record_on_pc.py
 ```
@@ -97,6 +107,17 @@ Press ctrl + 'c' will exit the program.
 For all data, it would be stored under the ./experiment folder.
 ### 2. Diagram
 You can draw the overlap degree and speaker time distribution digrams for visualizing the conversation by typing the following command:
+
+For Windows
+```
+py SpeakerIdentification\scripts\speaker_time_distribution.py
+```
+or
+```
+py OverlapDetection\scripts\overlap_degree_distribution.py
+```
+
+For Mac/Linux
 ```
 python3 SpeakerIdentification/scripts/speaker_time_distribution.py
 ```
