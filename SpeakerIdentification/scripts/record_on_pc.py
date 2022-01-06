@@ -273,11 +273,24 @@ def vad_collector(sample_rate, frame_duration_ms, padding_duration_ms, vad, fram
 def main():
     """pivot ambient noise, set it as ten seconds duration"""
 
-    val = input('[INFO] Please be quiet for 10 seconds and the ambient noise will be collected, press [y] to start.')
-    while val != 'y':
+    if os.path.exists(NOISE_PATH):
         val = input(
+                '[INFO] It seems like you have already recorded the ambient noise, do you want to recalibrate it?, press [y] to record it again or [n] not to record.')
+
+        while val != 'y' and val != 'n':
+            val = input(
+                '[INFO] It seems like you have already recorded the ambient noise, do you want to recalibrate it?, press [y] to record it again or [n] not to record.')
+
+        if val == 'y':
+            recording('Ambient_Noise', 10, False)
+
+    else:
+        val5 = input(
             '[INFO] Please be quiet for 10 seconds and the ambient noise will be collected, press [y] to start.')
-    recording('Ambient_Noise', 10, False, False)
+        while val5 != 'y':
+            val5 = input(
+                '[INFO] Please be quiet for 10 seconds and the ambient noise will be collected, press [y] to start.')
+        recording('Ambient_Noise', 10, False)
 
     """After recording the noise, then start to register the user"""
     count = 0

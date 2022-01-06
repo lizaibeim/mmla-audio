@@ -299,16 +299,28 @@ def vad_collector(sample_rate, frame_duration_ms, padding_duration_ms, vad, fram
 def main():
     """pivot ambient noise, set it as ten seconds duration"""
 
-    val = input('[INFO] Please be quiet for 10 seconds and the ambient noise will be collected, press [y] to start.')
-    while val != 'y':
+    if os.path.exists(NOISE_PATH):
         val = input(
-            '[INFO] Please be quiet for 10 seconds and the ambient noise will be collected, press [y] to start.')
-    recording('Ambient_Noise', 10, False)
+                '[INFO] It seems like you have already recorded the ambient noise, do you want to recalibrate it?, press [y] to record it again or [n] not to record.')
+
+        while val != 'y' and val != 'n':
+            val = input(
+                '[INFO] It seems like you have already recorded the ambient noise, do you want to recalibrate it?, press [y] to record it again or [n] not to record.')
+
+        if val == 'y':
+            recording('Ambient_Noise', 10, False)
+
+    else:
+        val2 = input('[INFO] Please be quiet for 10 seconds and the ambient noise will be collected, press [y] to start.')
+        while val2 != 'y':
+            val2 = input('[INFO] Please be quiet for 10 seconds and the ambient noise will be collected, press [y] to start.')
+        recording('Ambient_Noise', 10, False)
 
     """Run the speaker identification module"""
-    val4 = input('[INFO] Ready for overlap detection, press [s] to start.')
-    while val4 != 's':
-        val4 = input('[INFO] Ready for overlap detection, press [s] to start.')
+    val3 = input('[INFO] Ready for overlap detection, press [s] to start.')
+    while val3 != 's':
+        val3 = input('[INFO] Ready for overlap detection, press [s] to start.')
+
     run_overlap_detection(silence_removed=True)
 
 
