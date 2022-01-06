@@ -10,7 +10,7 @@ pip3 install virtualenv
 
 #### For Windows
 ```
-virtualenv venv
+py -m virtualenv venv
 ```
 
 #### For Mac/Linux
