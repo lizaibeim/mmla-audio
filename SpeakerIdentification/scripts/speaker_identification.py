@@ -3,26 +3,57 @@ import math
 import os
 import sys
 import time
+import wave
 
+from datetime import datetime
+from datetime import timedelta
+
+import webrtcvad
 import numpy as np
 import scipy.io.wavfile as wav
 import tensorflow as tf
+
 from python_speech_features import mfcc
 from sklearn.model_selection import train_test_split
 from tensorflow.keras import regularizers
-from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import EarlyStopping, Callback
 from tensorflow.keras.layers import Bidirectional, add, Input
 from tensorflow.keras.layers import LSTM, Dense, Activation, Conv1D, MaxPool1D, Dropout, \
     BatchNormalization, AveragePooling1D
 from tensorflow.keras.metrics import categorical_accuracy
 from tensorflow.keras.models import load_model, Model
 from tensorflow.keras.optimizers import RMSprop
+from pydub import AudioSegment  # need to add in setup
 
-np.random.seed(0)
+framerate = 16000  # sampling rate
+num_samples = 2000  # sampling points for each chunk
+channels = 1  # channels
+sampwidth = 2  # sample width 2bytes
+duration = 2.56  # recording voice for each 2.56 seconds
+vad = webrtcvad.Vad(3)
+np.random.seed(1)
 Root_Dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 
 
-# attain the file path list of the dataset
+class TerminateOnBaseline(Callback):
+    """Callback that terminates training when either acc or val_acc reaches a specified baseline
+    """
+
+    def __init__(self, monitor='categorical_accuracy', baseline=0.9):
+        super(TerminateOnBaseline, self).__init__()
+        self.monitor = monitor
+        self.baseline = baseline
+
+    def on_epoch_end(self, epoch, logs=None):
+        logs = logs or {}
+        acc = logs.get(self.monitor)
+        if acc is not None:
+            if acc >= self.baseline:
+                print('Epoch %d: Reached baseline, terminating training' % (epoch))
+                self.model.stop_training = True
+
+
+# attain the file path list of the dataset, filtering other format
 def get_wav_files(wav_path):
     wav_files = []
     for (dirpath, dirnames, filenames) in os.walk(wav_path):
@@ -288,7 +319,7 @@ def make_feature_experiment(wav_files):
     train_y = []
     begin_time = time.time()
     for i, onewav in enumerate(wav_files):
-        
+
         if i % 5 == 4:
             gaptime = time.time() - begin_time
             percent = float(i) * 100 / len(wav_files)
@@ -299,7 +330,7 @@ def make_feature_experiment(wav_files):
             sys.stdout.write('\r' + str_log)
 
         # for linux and macosx
-        if  os.name == 'posix':
+        if os.name == 'posix':
             label = onewav.split('/')[-1][:-4]
 
         # for windows
@@ -374,14 +405,14 @@ def transfer_learning(_x, _y, seed, _test_split_ratio, base_model_path, final_mo
     inputs = sliced_base_model.input
     x = sliced_base_model(inputs, training=False)
     dim = np.unique(_y, axis=0).shape[0]
-    outputs = Dense(dim, activation='softmax', name='customized_dense')(x)
+    outputs = Dense(dim, activation='sigmoid', name='customized_dense')(x)
     model = Model(inputs, outputs)
 
     model.compile(loss="categorical_crossentropy",
                   optimizer=RMSprop(lr=0.0001),
                   metrics=[categorical_accuracy]
                   )
-    epochs = 200
+    epochs = 300
 
     # print(_x.shape)
 
@@ -389,11 +420,15 @@ def transfer_learning(_x, _y, seed, _test_split_ratio, base_model_path, final_mo
     if _test_split_ratio > 0:
         x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=_test_split_ratio, stratify=_y,
                                                             random_state=seed)
-    x_train, x_validate, y_train, y_validate = train_test_split(x_train, y_train, test_size=0.2, stratify=y_train,
+    x_train, x_validate, y_train, y_validate = train_test_split(x_train, y_train, test_size=0.3, stratify=y_train,
                                                                 random_state=seed)
-    early_stopping = EarlyStopping(monitor='val_categorical_accuracy', patience=30)
-    model.fit(x_train, y_train, validation_data=(x_validate, y_validate), callbacks=[early_stopping],
-              batch_size=32, epochs=epochs)
+    # early_stopping = TerminateOnBaseline(monitor='val_categorical_accuracy', baseline=0.95)
+    # early_stopping = EarlyStopping(monitor='val_categorical_accuracy', patience=20)
+    # model.fit(x_train, y_train, validation_data=(x_validate, y_validate), callbacks=[early_stopping],
+    #           batch_size=16, epochs=epochs)
+
+    model.fit(x_train, y_train, validation_data=(x_validate, y_validate),
+              batch_size=16, epochs=epochs)
 
     if _test_split_ratio > 0:
         loss, accuracy = model.evaluate(x_test, y_test)
@@ -401,12 +436,13 @@ def transfer_learning(_x, _y, seed, _test_split_ratio, base_model_path, final_mo
 
     model.trainable = True
     model.compile(loss="categorical_crossentropy",
-                  optimizer=RMSprop(lr=1e-5),
+                  optimizer=RMSprop(lr=1e-6),
                   metrics=[categorical_accuracy]
                   )
 
-    epochs = 10
-    model.fit(x_train, y_train, validation_data=(x_validate, y_validate), batch_size=32,
+    epochs = 5
+
+    model.fit(x_train, y_train, validation_data=(x_validate, y_validate), batch_size=8,
               epochs=epochs)
 
     if _test_split_ratio > 0:
@@ -442,6 +478,7 @@ def transfer_learning(_x, _y, seed, _test_split_ratio, base_model_path, final_mo
 
 def transfer_learning_on_experiment():
     wav_files = get_wav_files(Root_Dir + "/experiment/data")
+    print(wav_files)
 
     x, y, speaker_id = make_feature_experiment(wav_files)
     np.savez(Root_Dir + "/experiment/experiment_feature", x, y)
@@ -453,7 +490,7 @@ def transfer_learning_on_experiment():
     y = input_feature['arr_1']
 
     test_split_ratio = 0
-    random_seed = 0
+    random_seed = 1
     base_model_path = Root_Dir + '/timit/model'
     final_model_path = Root_Dir + '/experiment/model'
 
@@ -525,35 +562,35 @@ if __name__ == '__main__':
     # _x, _y, paragraph_label = make_feature_thch30(wav_files)
     # np.savez(Root_Dir + "/small_dataset/small_dataset_feature", _x, _y)
 
-    '''Transfer learning on experimental dataset'''
-    wav_files = get_wav_files(Root_Dir + "/experiment/data")
-
-    x, y, speaker_id = make_feature_experiment(wav_files)
-    np.savez(Root_Dir + "/experiment/experiment_feature", x, y)
-    with open(Root_Dir + "/experiment/speaker_id_dict.json", 'w') as f:
-        json.dump(speaker_id, f)
-
-    input_feature = np.load(Root_Dir + "/experiment/experiment_feature.npz", allow_pickle=True)
-    x = input_feature['arr_0']
-    y = input_feature['arr_1']
-
-    test_split_ratio_lst = [0]
-    acc_lst_lst = []
-    base_model_path = Root_Dir + "/timit/model"
-    final_model_path = Root_Dir + "/experiment/model"
-    with open(Root_Dir + "/experiment/acc.txt", "w") as f:
-        f.write("split\trandom_state\tacc\n")
-        for test_split_ratio in test_split_ratio_lst:
-            acc_lst = []
-            for i in range(0, 1):
-                print(
-                    "################################################################################################")
-                print("test split, ", test_split_ratio, "random seed, ", i)
-                print(
-                    "################################################################################################")
-
-                acc = transfer_learning(x, y, i, test_split_ratio, base_model_path, final_model_path)
-                f.write(str(test_split_ratio) + "\t")
-                f.write(str(i) + "\t")
-                f.write(str(acc) + "\n")
-        f.close()
+    '''Transfer learning on experimental dataset with different test-split ratios and random seeds'''
+    # wav_files = get_wav_files(Root_Dir + "/experiment/data")
+    #
+    # x, y, speaker_id = make_feature_experiment(wav_files)
+    # np.savez(Root_Dir + "/experiment/experiment_feature", x, y)
+    # with open(Root_Dir + "/experiment/speaker_id_dict.json", 'w') as f:
+    #     json.dump(speaker_id, f)
+    #
+    # input_feature = np.load(Root_Dir + "/experiment/experiment_feature.npz", allow_pickle=True)
+    # x = input_feature['arr_0']
+    # y = input_feature['arr_1']
+    #
+    # test_split_ratio_lst = [0]
+    # acc_lst_lst = []
+    # base_model_path = Root_Dir + "/timit/model"
+    # final_model_path = Root_Dir + "/experiment/model"
+    # with open(Root_Dir + "/experiment/acc.txt", "w") as f:
+    #     f.write("split\trandom_state\tacc\n")
+    #     for test_split_ratio in test_split_ratio_lst:
+    #         acc_lst = []
+    #         for i in range(0, 1):
+    #             print(
+    #                 "################################################################################################")
+    #             print("test split, ", test_split_ratio, "random seed, ", i)
+    #             print(
+    #                 "################################################################################################")
+    #
+    #             acc = transfer_learning(x, y, i, test_split_ratio, base_model_path, final_model_path)
+    #             f.write(str(test_split_ratio) + "\t")
+    #             f.write(str(i) + "\t")
+    #             f.write(str(acc) + "\n")
+    #     f.close()

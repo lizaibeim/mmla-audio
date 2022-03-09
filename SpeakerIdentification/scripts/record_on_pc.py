@@ -82,14 +82,14 @@ def run_speaker_identification(noise_reduced=False, silence_removed=False):
 
     if not os.path.exists(Root_Dir + '/experiment/logs/'):
         os.mkdir(Root_Dir + '/experiment/logs/')
-    if not os.path.exists(Root_Dir + '/experiment/recordings/'):
-        os.mkdir(Root_Dir + '/experiment/recordings/')
+    if not os.path.exists(Root_Dir + '/experiment/recordings/real-time/'):
+        os.mkdir(Root_Dir + '/experiment/recordings/real-time/')
 
     pa = PyAudio()
 
     count = 0
     log_path = Root_Dir + '/experiment/logs/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[:-7] + '.txt'
-    run_dir = Root_Dir + '/experiment/recordings/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[:-7]
+    run_dir = Root_Dir + '/experiment/recordings/real-time/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[:-7]
     os.mkdir(run_dir)
 
     try:
@@ -131,7 +131,8 @@ def run_speaker_identification(noise_reduced=False, silence_removed=False):
                 continue
 
             prob = model.predict(x)
-            key = str(np.argmax(model.predict(x), axis=1)[0])
+            key = str(np.argmax(prob, axis=1)[0])
+            # key = str(np.argmax(model.predict(x), axis=1)[0])
             print('[RESULT] Predcition for the last 2 seconds: ', 'probability: ', prob, 'speaker: ',
                   speaker_id_dict[key])
 

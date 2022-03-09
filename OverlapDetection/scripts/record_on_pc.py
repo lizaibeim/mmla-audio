@@ -100,11 +100,11 @@ def run_overlap_detection(silence_removed=False):
 
     count = 0
     log_path = Root_Dir + '/experiment/logs/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[:-7] + '.txt'
-    p_dir = Root_Dir + '/experiment/recordings/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[
+    p_dir = Root_Dir + '/experiment/recordings/real-time/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[
                                                    :-7]
-    c_png_dir = Root_Dir + '/experiment/recordings/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[
+    c_png_dir = Root_Dir + '/experiment/recordings/real-time/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[
                                                        :-7] + '/png/'
-    c_wav_dir = Root_Dir + '/experiment/recordings/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[
+    c_wav_dir = Root_Dir + '/experiment/recordings/real-time/' + str(datetime.now()).replace(' ', '-').replace(':', '-')[
                                                        :-7] + '/wav/'
     os.mkdir(p_dir)
     os.mkdir(c_png_dir)
