@@ -14,6 +14,7 @@ import requests
 import soundfile as sf
 import tensorflow as tf
 import webrtcvad
+from speaker_identification_post_processing import standardize_audio
 from pyaudio import PyAudio, paInt16
 from tensorflow.keras import backend as K
 
@@ -41,9 +42,9 @@ class Frame(object):
 
 
 def recording(filename, duration, noise_reduced=False, silence_removed=False):
-    if not os.path.exists(Root_Dir + '/experiment/data/'):
-        os.mkdir(Root_Dir + '/experiment/data/')
-    filepath = Root_Dir + '/experiment/data/' + str(filename) + '.wav'
+    if not os.path.exists(Root_Dir + '/experiment/corpus/'):
+        os.mkdir(Root_Dir + '/experiment/corpus/')
+    filepath = Root_Dir + '/experiment/corpus/' + str(filename) + '.wav'
 
     pa = PyAudio()
     stream = pa.open(format=paInt16, channels=channels,
@@ -114,6 +115,8 @@ def run_speaker_identification(noise_reduced=False, silence_removed=False):
             filepath = run_dir + '/' + str(count) + '.wav'
 
             save_wave_file(filepath, frames, noise_reduced=noise_reduced, silence_removed=silence_removed)
+            # standardize_audio(filepath, dbfs=0, silence_remove=False)
+
             x = vi.input_feature_gen(filepath)
             if x == 'silent':
                 print('Predcition for the last 2 seconds: silent')
@@ -324,7 +327,17 @@ def main():
         if val2 == 'n':
             break
 
-    """Training on experiment dataset"""
+    """Standardize the experiment corpus"""
+    files_path = []
+    for (dirpath, dirnames, filenames) in os.walk(Root_Dir + '/experiment/data/'):
+        for filename in filenames:
+            filename_path = os.sep.join([dirpath, filename])
+            files_path.append(filename_path)
+
+    for i, onewav in enumerate(files_path):
+        standardize_audio(onewav, dbfs=0, silence_remove=False)
+
+    """Training on experiment corpus"""
     print('[INFO] Training...')
     acc = vi.transfer_learning_on_experiment()
     while acc < 0.80:

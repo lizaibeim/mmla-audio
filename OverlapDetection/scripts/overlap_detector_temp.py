@@ -47,7 +47,7 @@ def image_loader(image_dir, channels, sort=False):
 
     # sort images file by sessions, then segments in ascending order
     if sort: names.sort(
-        key=lambda name: (int(name.split('.')[0].split('_')[0][1:3]), int(name.split('.')[0].split('_')[3])))
+        key=lambda name: (int(name.segment('.')[0].segment('_')[0][1:3]), int(name.segment('.')[0].segment('_')[3])))
     images_path = [os.path.join(image_dir, name) for name in names]
 
     images_data = []
@@ -92,7 +92,7 @@ def data_augmentation(images_dir, labels_path, out_images_dir, out_labels_path):
 
     names = os.listdir(images_dir)
     # sort images file by sessions, then segments in ascending order to keep line with labels
-    names.sort(key=lambda x: (int(x.split('.')[0].split('_')[0].replace('S', '')), int(x.split('.')[0].split('_')[3])))
+    names.sort(key=lambda x: (int(x.segment('.')[0].segment('_')[0].replace('S', '')), int(x.segment('.')[0].segment('_')[3])))
 
     for i in range(len(df)):
 
@@ -437,7 +437,7 @@ if __name__ == '__main__':
     """
     # df = pd.read_excel('D:/OverlapDetection/multisimo/labelling_results/OverlapLabels.xlsx').loc[:, ['overlap_degree']]
     # names = os.listdir('D:/OverlapDetection/multisimo/mel_spectrum_zcr')
-    # names.sort(key=lambda name: (int(name.split('.')[0].split('_')[0][1:3]), int(name.split('.')[0].split('_')[3])))
+    # names.sort(key=lambda name: (int(name.segment('.')[0].segment('_')[0][1:3]), int(name.segment('.')[0].segment('_')[3])))
     # df.insert(0, "image_file_name", names, True)
     # df.to_csv('./multisimo/labelling_results/multisimo_overlap_labels.csv')
     # selected_df = df[df['overlap_degree'] != 0]

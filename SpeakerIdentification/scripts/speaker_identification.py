@@ -405,6 +405,7 @@ def transfer_learning(_x, _y, seed, _test_split_ratio, base_model_path, final_mo
     inputs = sliced_base_model.input
     x = sliced_base_model(inputs, training=False)
     dim = np.unique(_y, axis=0).shape[0]
+    # outputs = Dense(dim, activation='softmax', name='customized_dense')(x)
     outputs = Dense(dim, activation='sigmoid', name='customized_dense')(x)
     model = Model(inputs, outputs)
 
@@ -412,7 +413,7 @@ def transfer_learning(_x, _y, seed, _test_split_ratio, base_model_path, final_mo
                   optimizer=RMSprop(lr=0.0001),
                   metrics=[categorical_accuracy]
                   )
-    epochs = 300
+    epochs = 500
 
     # print(_x.shape)
 
@@ -422,7 +423,7 @@ def transfer_learning(_x, _y, seed, _test_split_ratio, base_model_path, final_mo
                                                             random_state=seed)
     x_train, x_validate, y_train, y_validate = train_test_split(x_train, y_train, test_size=0.3, stratify=y_train,
                                                                 random_state=seed)
-    # early_stopping = TerminateOnBaseline(monitor='val_categorical_accuracy', baseline=0.95)
+    # early_stopping = TerminateOnBaseline(monitor='val_categorical_accuracy', baseline=0.99)
     # early_stopping = EarlyStopping(monitor='val_categorical_accuracy', patience=20)
     # model.fit(x_train, y_train, validation_data=(x_validate, y_validate), callbacks=[early_stopping],
     #           batch_size=16, epochs=epochs)
@@ -440,7 +441,7 @@ def transfer_learning(_x, _y, seed, _test_split_ratio, base_model_path, final_mo
                   metrics=[categorical_accuracy]
                   )
 
-    epochs = 5
+    epochs = 20
 
     model.fit(x_train, y_train, validation_data=(x_validate, y_validate), batch_size=8,
               epochs=epochs)
@@ -477,7 +478,7 @@ def transfer_learning(_x, _y, seed, _test_split_ratio, base_model_path, final_mo
 
 
 def transfer_learning_on_experiment():
-    wav_files = get_wav_files(Root_Dir + "/experiment/data")
+    wav_files = get_wav_files(Root_Dir + "/experiment/corpus/")
     print(wav_files)
 
     x, y, speaker_id = make_feature_experiment(wav_files)
@@ -562,7 +563,7 @@ if __name__ == '__main__':
     # _x, _y, paragraph_label = make_feature_thch30(wav_files)
     # np.savez(Root_Dir + "/small_dataset/small_dataset_feature", _x, _y)
 
-    '''Transfer learning on experimental dataset with different test-split ratios and random seeds'''
+    '''Transfer learning on experimental dataset with different test-segment ratios and random seeds'''
     # wav_files = get_wav_files(Root_Dir + "/experiment/data")
     #
     # x, y, speaker_id = make_feature_experiment(wav_files)
@@ -579,13 +580,13 @@ if __name__ == '__main__':
     # base_model_path = Root_Dir + "/timit/model"
     # final_model_path = Root_Dir + "/experiment/model"
     # with open(Root_Dir + "/experiment/acc.txt", "w") as f:
-    #     f.write("split\trandom_state\tacc\n")
+    #     f.write("segment\trandom_state\tacc\n")
     #     for test_split_ratio in test_split_ratio_lst:
     #         acc_lst = []
     #         for i in range(0, 1):
     #             print(
     #                 "################################################################################################")
-    #             print("test split, ", test_split_ratio, "random seed, ", i)
+    #             print("test segment, ", test_split_ratio, "random seed, ", i)
     #             print(
     #                 "################################################################################################")
     #

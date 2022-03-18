@@ -28,7 +28,7 @@ def images_loader(image_dir, channels):
     """
     names = os.listdir(image_dir)
     # sort images file by sessions, then segments in ascending order
-    names.sort(key=lambda name: (int(name.split('.')[0].split('_')[0][1:3]), int(name.split('.')[0].split('_')[3])))
+    names.sort(key=lambda name: (int(name.segment('.')[0].segment('_')[0][1:3]), int(name.segment('.')[0].segment('_')[3])))
     images_path = [os.path.join(image_dir, name) for name in names]
 
     images_data = []
@@ -174,7 +174,7 @@ class OverlapDetector:
         names = os.listdir(in_images_dir)
         # sort images file by sessions, then segments in ascending order aligned with labels' order
         names.sort(
-            key=lambda x: (int(x.split('.')[0].split('_')[0].replace('S', '')), int(x.split('.')[0].split('_')[3])))
+            key=lambda x: (int(x.segment('.')[0].segment('_')[0].replace('S', '')), int(x.segment('.')[0].segment('_')[3])))
 
         for i in range(len(df)):
             if df.iloc[i]['Overlap'] == 0:
@@ -257,7 +257,7 @@ class OverlapDetector:
 
     def __split_train_test(self):
         """
-        split the oringinal dataset into train test dataset with ratio 4:1
+        segment the oringinal dataset into train test dataset with ratio 4:1
         """
 
         df = pd.read_excel(self.labels_path)
@@ -287,7 +287,7 @@ class OverlapDetector:
 
         names = os.listdir(self.images_dir)
         # sort images file by sessions, then segments in ascending order
-        names.sort(key=lambda name: (int(name.split('.')[0].split('_')[0][1:3]), int(name.split('.')[0].split('_')[3])))
+        names.sort(key=lambda name: (int(name.segment('.')[0].segment('_')[0][1:3]), int(name.segment('.')[0].segment('_')[3])))
         # images_path = [os.path.join(self.images_dir, name) for name in names]
 
         self.__train_images_dir = self.images_dir + '_train'

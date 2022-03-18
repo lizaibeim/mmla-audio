@@ -79,7 +79,10 @@ def visualization():
 
         labels = list(speaker_dist_dict.keys())
         distributions = list(speaker_dist_dict.values())
-        norm_distributions = [round(float(i) / sum(distributions), 2) for i in distributions]
+        # print(distributions)
+        norm_distributions = [round(float(i) / sum(distributions), 4) for i in distributions]
+
+        # print(norm_distributions)
         seconds_distribution = [int(i * total_seconds) for i in norm_distributions]
 
         bar = (

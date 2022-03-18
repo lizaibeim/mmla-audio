@@ -5,17 +5,22 @@ import wave
 from pydub import AudioSegment
 from datetime import datetime, timedelta
 from overlap_features_generator import OverlapFeaturesGenerator
+import overlap_degree_distribution as odd
 import tensorflow as tf
 import numpy as np
+import noisereduce as nr
+import soundfile as sf
+import librosa
 import webrtcvad
 from tensorflow.keras import backend as K
 
 vad = webrtcvad.Vad(3)
 Root_Dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 overlap_degree_dict = {'0': 'non-overlapped', '1': 'overlapped'}
+NOISE_PATH = os.path.join(Root_Dir, 'experiment/Ambient_Noise.wav')
 
 
-def split(src_dir, dst_dir, win_time_stride, step_time):
+def segmentation(src_dir, dst_dir, win_time_stride, step_time):
     """
     :param src_dir: directory of the clips to cut
     :param dst_dir: directory to store the new cut clips
@@ -80,41 +85,67 @@ def split(src_dir, dst_dir, win_time_stride, step_time):
         print("Total number of frames :", nframes, " Extract frames: ", step_total_num_frames)
 
 
-def standardize_audio(source_path, target_path=None, format=None, dbfs=None, channels=1, sampwidth=2, sr=16000,
-                      silence_remove=False):
-    sound = AudioSegment.from_file(source_path, format)
+def read_wave_file(filepath):
+    wf = wave.open(filepath, 'rb')
+    num_channels = wf.getnchannels()
+    assert num_channels == 1
+    sample_width = wf.getsampwidth()
+    assert sample_width == 2
+    sample_rate = wf.getframerate()
+    # print(sample_rate)
+    assert sample_rate in (8000, 16000, 32000, 48000)
+    data = wf.readframes(wf.getnframes())
+    return data, sample_rate
 
-    print(sound.frame_rate)
 
-    if sr:
-        sound = sound.set_frame_rate(sr)
-    if dbfs:
-        change_dBFS = dbfs - sound.dBFS
-        sound = sound.apply_gain(change_dBFS)
+def standardize_audio(source_path, target_path=None, format=None, dbfs=None, channels=1, sampwidth=2, sample_rate=16000,
+                      noise_reduced=0, silence_remove=False):
+    """normalize the audio volume"""
+    (y, sr) = librosa.load(source_path)
+    max_peak = np.max(np.abs(y))
+
+    ratio = 1 / max_peak
+
+    y = y * ratio
+
+    print('Previous peak: ', max_peak, 'Now peak: ', np.max(np.abs(y)))
 
     if not target_path:
         target_path = source_path[:-4] + '.wav'
-        print(target_path)
+
+    sf.write(target_path, y, sr, format='wav')
+
+    sound = AudioSegment.from_file(source_path, format)
+
+    if sample_rate:
+        sound = sound.set_frame_rate(sample_rate)
+    if dbfs:
+        change_dBFS = dbfs - sound.dBFS
+        sound = sound.apply_gain(change_dBFS)
+    sound.export(target_path, format='wav')
+
+    noise, _ = librosa.load(NOISE_PATH, sr=None)
+    while noise_reduced > 0:
+        noise_reduced -= 1
+        y, _ = librosa.load(target_path, sr=None)
+        noise_reduced_wav = nr.reduce_noise(y_noise=noise, y=y, sr=sample_rate, stationary=True)
+        sf.write(target_path, noise_reduced_wav, sample_rate)
 
     if silence_remove:
         # since record_on_pc also import speaker_identification, couldn't import on top of file
         from record_on_pc import frame_generator, vad_collector
-        audio_data = sound.raw_data
-        frames = frame_generator(30, audio_data, sound.frame_rate)
+        audio_data, sr = read_wave_file(target_path)
+        frames = frame_generator(30, audio_data, sr)
         frames = list(frames)
-        segments = vad_collector(sound.frame_rate, 30, 300, vad, frames)
+        segments = vad_collector(sr, 30, 300, vad, frames)
 
         wf = wave.open(target_path, 'wb')
         wf.setnchannels(channels)
         wf.setsampwidth(sampwidth)
-        wf.setframerate(sr)
+        wf.setframerate(sample_rate)
         for i, segments in enumerate(segments):
             wf.writeframes(segments)
-
         wf.close()
-
-    else:
-        sound.export(target_path, format='wav')
 
 
 def post_anlysing():
@@ -122,14 +153,14 @@ def post_anlysing():
     model_path = os.path.join(Root_Dir, 'timit/models/timit2.0')
     model = tf.keras.models.load_model(model_path)
 
-    """standardize the conversation files under the experiment/recordings/post-time/original folder"""
+    """standardize the conversation files under the experiment/recordings/post-time/whole folder"""
     conversations_path = []
     standardized_conversations_path = []
     logs_path = []
     segments_dirs = []
     features_dirs = []
 
-    for (dirpath, dirnames, filenames) in os.walk(os.path.join(Root_Dir, 'experiment/recordings/post-time/original')):
+    for (dirpath, dirnames, filenames) in os.walk(os.path.join(Root_Dir, 'experiment/recordings/post-time/whole')):
         for filename in filenames:
             filename_path = os.sep.join([dirpath, filename])
             conversations_path.append(filename_path)
@@ -143,16 +174,22 @@ def post_anlysing():
         if not os.path.exists(feature_dir):
             os.mkdir(feature_dir)
 
-    print(segments_dirs)
-    print(logs_path)
-    print(features_dirs)
+    # print(segments_dirs)
+    # print(logs_path)
+    # print(features_dirs)
 
     for i, onewav in enumerate(conversations_path):
-        standardize_audio(onewav, standardized_conversations_path[i], dbfs=0, silence_remove=False)
+        if onewav.split('\\')[-1].startswith('zoom'):
+            print("[INFO]Processing zoom audio file .")
+            standardize_audio(onewav, standardized_conversations_path[i], dbfs=0, noise_reduced=0, silence_remove=False)
+        elif onewav.split('\\')[-1].startswith('audio'):
+            print("[INFO]Processing recorded audio file.")
+            standardize_audio(onewav, standardized_conversations_path[i], dbfs=0, noise_reduced=3, silence_remove=False)
 
-    """split the standradized conversation files into several segments which is 1.5 seconds for each"""
-    split('D:/MMLA_Audio/OverlapDetection/experiment/recordings/post-time/standardized',
-          'D:/MMLA_Audio/OverlapDetection/experiment/recordings/post-time/segments', 1.5, 1.5)
+    """segment the standradized conversation files into several segments which is 1.5 seconds for each"""
+    src_dir = Root_Dir + '/experiment/recordings/post-time/standardized/'
+    dst_dir = Root_Dir + '/experiment/recordings/post-time/segments/'
+    segmentation(src_dir, dst_dir, 1.5, 1.5)
 
     """features generation and prediction"""
     for i, segments_dir in enumerate(segments_dirs):
@@ -170,8 +207,8 @@ def post_anlysing():
 
             prob = model.predict(_input)
             key = str(np.argmax(prob, axis=1)[0])
-            # print('[INFO] Predcition for the last 1.5 seconds: ', 'probability: ', prob, 'overlap degree: ',
-            #       overlap_degree_dict[key])
+            print('[INFO] Prediction for segment ', count,  ': probability: ', prob, ' overlapped degree: ',
+                  overlap_degree_dict[key])
 
             if count == 0:
                 with open(logs_path[i], 'w') as f:
@@ -192,7 +229,7 @@ def post_anlysing():
 if __name__ == "__main__":
     """path creation"""
     paths = [os.path.join(Root_Dir, 'experiment/recordings/'),
-             os.path.join(Root_Dir, 'experiment/recordings/post-time/original/'),
+             os.path.join(Root_Dir, 'experiment/recordings/post-time/whole/'),
              os.path.join(Root_Dir, 'experiment/recordings/post-time/features/'),
              os.path.join(Root_Dir, 'experiment/recordings/post-time/segments/'),
              os.path.join(Root_Dir, 'experiment/recordings/post-time/standardized/')]
@@ -202,6 +239,7 @@ if __name__ == "__main__":
             os.mkdir(path)
 
     """
-    Before running the scripts, you need to put the conversation audio files under the experiment/recordings/post-time/original/ folder
+    Before running the scripts, you need to put the conversation audio files under the experiment/recordings/post-time/whole/ folder
     """
     post_anlysing()
+    odd.visualization()

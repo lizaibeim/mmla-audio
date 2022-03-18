@@ -4,11 +4,15 @@ import wave
 from datetime import datetime
 from datetime import timedelta
 
+import librosa
 import numpy as np
+import noisereduce as nr
 import scipy.io.wavfile as wav
+import soundfile as sf
 import tensorflow as tf
 import webrtcvad
 from pydub import AudioSegment
+from pydub import effects
 from python_speech_features import mfcc
 
 import speaker_identification as si
@@ -22,6 +26,7 @@ duration = 2.56  # recording voice for each 2.56 seconds
 vad = webrtcvad.Vad(3)
 np.random.seed(1)
 Root_Dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+NOISE_PATH = os.path.join(Root_Dir, 'experiment/Ambient_Noise.wav')
 
 
 def delta(feat, N):
@@ -115,13 +120,6 @@ def segmentation(src_dir, dst_dir, win_time_stride, step_time):
         print("Total number of frames :", nframes, " Extract frames: ", step_total_num_frames)
 
 
-def segment_all_audio_files():
-    src_dir = Root_Dir + '/experiment/recordings/post-time/whole/'
-    dst_dir = Root_Dir + '/experiment/recordings/post-time/segments/'
-
-    segmentation(src_dir, dst_dir, 2.56, 2.56)
-
-
 def read_wave_file(filepath):
     wf = wave.open(filepath, 'rb')
     num_channels = wf.getnchannels()
@@ -129,51 +127,70 @@ def read_wave_file(filepath):
     sample_width = wf.getsampwidth()
     assert sample_width == 2
     sample_rate = wf.getframerate()
+    # print(sample_rate)
     assert sample_rate in (8000, 16000, 32000, 48000)
     data = wf.readframes(wf.getnframes())
     return data, sample_rate
 
 
-def standardize_audio(source_path, target_path=None, format=None, dbfs=None, channels=1, sampwidth=2, sr=16000,
-                      silence_remove=False):
-    sound = AudioSegment.from_file(source_path, format)
+def standardize_audio(source_path, target_path=None, format=None, dbfs=None, channels=1, sampwidth=2, sample_rate=16000,
+                      noise_reduced=0, silence_remove=False):
+    if not target_path:
+        target_path = source_path[:-4] + '.wav'
 
-    # print(sound.frame_rate)
+    """Normalize the audio volume dynamically to 1 as the the peak"""
+    (y, sr) = librosa.load(source_path)
+    max_peak = np.max(np.abs(y))
 
-    if sr:
-        sound = sound.set_frame_rate(sr)
+    ratio = 1 / max_peak
+
+    y = y * ratio
+
+    print('Previous peak: ', max_peak, 'Now peak: ', np.max(np.abs(y)))
+
+    sf.write(target_path, y, sr, format='wav')
+
+    "Equalize all parts of audio to its peak"
+    # _sound = AudioSegment.from_file(target_path, "wav")
+    # sound = effects.normalize(_sound)
+
+    sound = AudioSegment.from_file(target_path, "wav")
+
+    if sample_rate:
+        sound = sound.set_frame_rate(sample_rate)
+
     if dbfs:
         change_dBFS = dbfs - sound.dBFS
         sound = sound.apply_gain(change_dBFS)
+    sound.export(target_path, format='wav')
 
-    if not target_path:
-        target_path = source_path[:-4] + '.wav'
-        # print(target_path)
+    noise, _ = librosa.load(NOISE_PATH, sr=None)
+    while noise_reduced > 0:
+        noise_reduced -= 1
+        y, _ = librosa.load(target_path, sr=None)
+        noise_reduced_wav = nr.reduce_noise(y_noise=noise, y=y, sr=sample_rate, stationary=True)
+        sf.write(target_path, noise_reduced_wav, sample_rate)
 
     if silence_remove:
         # since record_on_pc also import speaker_identification, couldn't import on top of file
         from record_on_pc import frame_generator, vad_collector
-        audio_data = sound.raw_data
-        frames = frame_generator(30, audio_data, sound.frame_rate)
+        audio_data, sr = read_wave_file(target_path)
+        frames = frame_generator(30, audio_data, sr)
         frames = list(frames)
-        segments = vad_collector(sound.frame_rate, 30, 300, vad, frames)
+        segments = vad_collector(sr, 30, 300, vad, frames)
 
         wf = wave.open(target_path, 'wb')
         wf.setnchannels(channels)
         wf.setsampwidth(sampwidth)
-        wf.setframerate(sr)
+        wf.setframerate(sample_rate)
         for i, segments in enumerate(segments):
             wf.writeframes(segments)
-
         wf.close()
-
-    else:
-        sound.export(target_path, format='wav')
 
 
 def post_analysing():
     """Require the User update the regsitered speaker in /experiment/data/, later will generate the speaker_id_dict.json from data but not the existed one"""
-    files = os.listdir(Root_Dir + '/experiment/data/')
+    files = os.listdir(Root_Dir + '/experiment/corpus/')
     speaker_id_dict = {}
 
     for i in range(len(files)):
@@ -191,7 +208,7 @@ def post_analysing():
         time = datetime.today()
         segment_no = -1
         segments_directory_path = Root_Dir + '/experiment/recordings/post-time/segments/' + directory_name
-        whole_wav_path = Root_Dir + '/experiment/recordings/post-time/whole/' + directory_name + '.wav'
+        whole_wav_path = Root_Dir + '/experiment/recordings/post-time/standardized/' + directory_name + '.wav'
         log_path = Root_Dir + '/experiment/logs/' + directory_name + '.txt'
 
         if os.path.exists(log_path):
@@ -211,7 +228,6 @@ def post_analysing():
             # print('sample rate ', sr, 'length', len(data))
 
             """check whether it is silent"""
-            # sig, rate = read_wave_file(wav_path)
             # since record_on_pc also import speaker_identification, couldn't import on top of file
             from record_on_pc import frame_generator, vad_collector
 
@@ -273,11 +289,14 @@ def post_analysing():
             prob = results[i]
 
             # set a threshold for recognizing speaker
-            if np.amax(prob, axis=0) > 0.7:
-                key = str(np.argmax(prob, axis=0))
-                speaker = speaker_id_dict[key]
-            else:
-                speaker = 'Unkown'
+            # if np.amax(prob, axis=0) > 0.9:
+            #     key = str(np.argmax(prob, axis=0))
+            #     speaker = speaker_id_dict[key]
+            # else:
+            #     speaker = 'Unkown'
+
+            key = str(np.argmax(prob, axis=0))
+            speaker = speaker_id_dict[key]
 
             print('[RESULT] Prediction for segment', i, ': ', 'probability: ', prob, 'speaker: ', speaker)
 
@@ -295,30 +314,41 @@ def post_analysing():
 
 if __name__ == "__main__":
     '''trim regsitry audio to one minute'''
-    # trim_audio('D:\MMLA_Audio\SpeakerIdentification\experiment\data/eric.m4a', 'D:\MMLA_Audio\SpeakerIdentification\experiment\data/eric.wav', 10, 70)
-
-    '''segment the converstaion'''
-    segment_all_audio_files()
+    # trim_audio('D:\MMLA_Audio\SpeakerIdentification\experiment\corpus/eric.m4a', 'D:\MMLA_Audio\SpeakerIdentification\experiment\corpus/eric.wav', 10, 70)
 
     '''standardize the registered speakers' corpus'''
     files_path = []
-    for (dirpath, dirnames, filenames) in os.walk(Root_Dir + '/experiment/data/'):
+    for (dirpath, dirnames, filenames) in os.walk(Root_Dir + '/experiment/corpus/'):
         for filename in filenames:
             filename_path = os.sep.join([dirpath, filename])
             files_path.append(filename_path)
 
     for i, onewav in enumerate(files_path):
-        standardize_audio(onewav, dbfs=0, silence_remove=True)
+        standardize_audio(onewav, dbfs=0, noise_reduced=0, silence_remove=True)
+        # standardize_audio(onewav, noise_reduced=0, silence_remove=True)
 
     '''training model for the registered speakers'''
     acc = si.transfer_learning_on_experiment()
 
-    '''standarize the conversation file and do the post analysing on it'''
+    '''standarize the conversation file'''
     conversation_list = os.listdir(Root_Dir + '/experiment/recordings/post-time/whole/')
     for audio_file_name in conversation_list:
         src_audio_path = os.path.join(Root_Dir + '/experiment/recordings/post-time/whole/', audio_file_name)
-        dst_audio_path = src_audio_path[:-4] + '.wav'
-        standardize_audio(src_audio_path, dst_audio_path, dbfs=0, silence_remove=False)
+        dst_audio_path = os.path.join(Root_Dir + '/experiment/recordings/post-time/standardized/', audio_file_name[:-4] + '.wav')
 
+        if audio_file_name.startswith('zoom'):
+            print('[INFO]Processing zoom conversation file.')
+            standardize_audio(src_audio_path, dst_audio_path, dbfs=0, noise_reduced=0, silence_remove=False)
+        elif audio_file_name.startswith('audio'):
+            print('[INFO]Processing recorded conversation file.')
+            standardize_audio(src_audio_path, dst_audio_path, dbfs=0, noise_reduced=3, silence_remove=False)
+        # standardize_audio(src_audio_path, dst_audio_path, noise_reduced=0, silence_remove=False)
+
+    '''segment the converstaion file'''
+    src_dir = Root_Dir + '/experiment/recordings/post-time/standardized/'
+    dst_dir = Root_Dir + '/experiment/recordings/post-time/segments/'
+    segmentation(src_dir, dst_dir, 2.56, 2.56)
+
+    '''start analysing'''
     post_analysing()
     std.visualization()

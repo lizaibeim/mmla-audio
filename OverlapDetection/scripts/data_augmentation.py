@@ -59,8 +59,8 @@ def run_overlaps_generator():
             index = selected_speaker * 10 + selected_sample
             wav_path = os.path.join(DATASET, labels['path_from_data_dir_windows'].values[index])
             wav_list.append(wav_path)
-            speakers_id = labels['path_from_data_dir_windows'].values[index].split('\\\\')[
-                2] if j == 0 else speakers_id + '_' + labels['path_from_data_dir_windows'].values[index].split('\\\\')[
+            speakers_id = labels['path_from_data_dir_windows'].values[index].segment('\\\\')[
+                2] if j == 0 else speakers_id + '_' + labels['path_from_data_dir_windows'].values[index].segment('\\\\')[
                 2]
 
         path_from_data_dir_winodws = 'OVERLAP\\\\' + 'Overlap' + str(i) + '.WAV.wav'
