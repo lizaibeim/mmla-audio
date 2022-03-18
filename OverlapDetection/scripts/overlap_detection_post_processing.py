@@ -227,17 +227,6 @@ def post_anlysing():
 
 
 if __name__ == "__main__":
-    """path creation"""
-    paths = [os.path.join(Root_Dir, 'experiment/recordings/'),
-             os.path.join(Root_Dir, 'experiment/recordings/post-time/whole/'),
-             os.path.join(Root_Dir, 'experiment/recordings/post-time/features/'),
-             os.path.join(Root_Dir, 'experiment/recordings/post-time/segments/'),
-             os.path.join(Root_Dir, 'experiment/recordings/post-time/standardized/')]
-
-    for path in paths:
-        if not os.path.exists(path):
-            os.mkdir(path)
-
     """
     Before running the scripts, you need to put the conversation audio files under the experiment/recordings/post-time/whole/ folder
     """
