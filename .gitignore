@@ -1,11 +1,5 @@
 # ignore the following directories
-/OverlapDetection/experiment/charts/*
-/OverlapDetection/experiment/logs/*
-/OverlapDetection/experiment/recordings/post-time/features/*
-/OverlapDetection/experiment/recordings/post-time/segments/*
-/OverlapDetection/experiment/recordings/post-time/standardized/*
-/OverlapDetection/experiment/recordings/post-time/whole/*
-/OverlapDetection/experiment/recordings/real-time/*
+/OverlapDetection/experiment/*
 /SpeakerIdentification/experiment/*
 
 venv/
