@@ -1,12 +1,20 @@
 # ignore the following directories
-/OverlapDetection/experiment/*
+/OverlapDetection/experiment/charts/*
+/OverlapDetection/experiment/logs/*
+/OverlapDetection/experiment/recordings/post-time/features/*
+/OverlapDetection/experiment/recordings/post-time/segments/*
+/OverlapDetection/experiment/recordings/post-time/standardized/*
+/OverlapDetection/experiment/recordings/post-time/whole/*
+/OverlapDetection/experiment/recordings/real-time/*
 /SpeakerIdentification/experiment/*
+
 venv/
 .idea/
 __pycache__/
 
 # ignore the following files
 .DS_Store
+Ambient_Noise.wav
 
 # unignore the following files
 !.gitkeep
