@@ -1,4 +1,4 @@
-# User Manual
+# User Manual for MMLA Audio
 
 ## I. Create the virtual environment and install the required third-party libraries
 
